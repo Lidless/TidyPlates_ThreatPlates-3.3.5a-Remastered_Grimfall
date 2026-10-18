@@ -3,11 +3,12 @@
 ## Notes: Threat reactive nameplates with a class independent Tank / DPS / Healer role and a "who is the mob attacking" line. Based on Threat Plates by |cff3079ffSuicidal Katt|r.
 ## Notes-zhTW:創新的|cff89F559仇恨響應姓名板|r by|cff3079ffSuicidal Katt|r 漢化by|cff3079ffSamonyoge@狂熱之刃|r。
 ## Notes-zhCN:创新的|cff89F559仇恨响应姓名板|r by|cff3079ffSuicidal Katt|r 汉化by|cff3079ff我的航海日志@耐奥祖|r。
-## Author: Suicidal Katt (Kader Backport)
+## Author: Suicidal Katt (Kader Backport, Grimfall edition by Lidless)
 ## RequiredDeps: TidyPlates
 ## SavedVariables: ThreatPlatesDB
 ## Version: 5.7-role1
 ## OptionalDeps: LibSharedMedia-3.0
+## X-Website: https://github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall
 ## X-Date: 2022-08-07 @ 03:19 PM |cff808080UTC|r
 
 Libs\embeds.xml

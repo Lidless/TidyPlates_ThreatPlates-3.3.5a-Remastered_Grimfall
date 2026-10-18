@@ -6,7 +6,7 @@ Threat reactive nameplate theme for **Tidy Plates** on WoW 3.3.5a (WotLK), rewor
 
 - Original author: **Suicidal Katt**
 - 3.3.5 backport: **Kader**
-- Grimfall & classless compatibility: **Lidless**
+- Grimfall & classless edition: **Lidless**
 
 ## Requirements
 
@@ -70,3 +70,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 | `/tptptoggle` | Switch between Tank and DPS |
 | `/tptpverbose` | Chat messages of the addon on / off |
 | `/tptpol` | Toggle overlapping nameplates |
+
+## Feedback
+
+Bugs, ideas and questions: please open an **issue** in this repository. There is no e-mail contact.

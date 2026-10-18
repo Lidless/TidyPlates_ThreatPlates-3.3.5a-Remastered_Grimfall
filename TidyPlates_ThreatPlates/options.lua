@@ -526,7 +526,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559/tptp|r - open these options\n|cff89F559/tptprole tank||dps||heal|r - set your role (without argument: show current role)\n|cff89F559/tptptank|r, |cff89F559/tptpdps|r, |cff89F559/tptpheal|r - set your role\n|cff89F559/tptptoggle|r - switch between Tank and DPS\n|cff89F559/tptpverbose|r - turn chat messages of the addon on / off\n|cff89F559/tptpol|r - toggle overlapping nameplates"
+									name = "|cff89F559/tptp|r - open these options\n|cff89F559/tptprole tank||dps||heal|r - set your role (without argument: show current role)\n|cff89F559/tptptank|r, |cff89F559/tptpdps|r, |cff89F559/tptpheal|r - set your role\n|cff89F559/tptptoggle|r - switch between Tank and DPS\n|cff89F559/tptpverbose|r - turn chat messages of the addon on / off\n|cff89F559/tptpol|r - toggle overlapping nameplates\n\nBugs, ideas, feedback: GitHub issues at |cff00ff00github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall|r"
 								}
 							}
 						},
@@ -4101,7 +4101,7 @@ local function GetOptions()
 						},
 						AboutInfo = {
 							type = "description",
-							name = L["Clear and easy to use nameplate theme for use with TidyPlates.\n\nFeel free to email me at |cff00ff00bkader@mail.com|r"],
+							name = "Clear and easy to use nameplate theme for use with TidyPlates.\n\nGrimfall edition by |cff89F559Lidless|r.\nBugs, ideas, feedback: open an issue on GitHub:\n|cff00ff00github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall|r",
 							order = 2,
 							width = "double"
 						},
