@@ -18,4 +18,5 @@ Commands.lua
 Functions.lua
 Widgets.xml
 Options.lua
+MinimapButton.lua
 Styles.xml

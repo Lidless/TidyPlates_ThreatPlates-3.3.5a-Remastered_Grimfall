@@ -74,6 +74,9 @@ function TidyPlatesThreat:SetRole(role, silent)
 	if self.RoleChanged then
 		self.RoleChanged() -- lets group members know (TargetOfWidget.lua)
 	end
+	if self.UpdateMinimapButton then
+		self:UpdateMinimapButton()
+	end
 	if not silent and self.db.profile.verbose then
 		print("|cff89F559Threat Plates|r: your role is now " .. self:roleText() .. ".")
 	end
@@ -628,6 +631,10 @@ function TidyPlatesThreat:OnInitialize()
 				b = 0.2666666666666667,
 				a = 1,
 				inverted = true
+			},
+			minimap = {
+				hide = false,
+				angle = 225
 			},
 			targetOfWidget = {
 				ON = true,

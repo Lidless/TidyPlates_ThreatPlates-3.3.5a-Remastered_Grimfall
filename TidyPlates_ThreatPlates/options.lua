@@ -465,6 +465,21 @@ local function GetOptions()
 							type = "description",
 							order = 3,
 							name = "\nChat commands: |cff89F559/tptprole tank||dps||heal|r, |cff89F559/tptptank|r, |cff89F559/tptpdps|r, |cff89F559/tptpheal|r.\nYour role is shared with group members who also use this Threat Plates version, so their nameplates can show [T]/[H]/[D] next to your name."
+						},
+						Minimap = {
+							name = "Show minimap button",
+							type = "toggle",
+							order = 4,
+							width = "double",
+							desc = "Minimap button showing your role. Left click: open this tab. Right click: switch role (Tank > DPS > Healer). Drag: move it.",
+							get = function()
+								return not (db.minimap and db.minimap.hide)
+							end,
+							set = function(info, val)
+								db.minimap = db.minimap or {}
+								db.minimap.hide = not val
+								TidyPlatesThreat:UpdateMinimapButton()
+							end
 						}
 					}
 				},
@@ -526,7 +541,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559/tptp|r - open these options\n|cff89F559/tptprole tank||dps||heal|r - set your role (without argument: show current role)\n|cff89F559/tptptank|r, |cff89F559/tptpdps|r, |cff89F559/tptpheal|r - set your role\n|cff89F559/tptptoggle|r - switch between Tank and DPS\n|cff89F559/tptpverbose|r - turn chat messages of the addon on / off\n|cff89F559/tptpol|r - toggle overlapping nameplates\n\nBugs, ideas, feedback: GitHub issues at |cff00ff00github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall|r"
+									name = "|cff89F559/tptp|r - open these options\n|cff89F559/tptprole tank||dps||heal|r - set your role (without argument: show current role)\n|cff89F559/tptptank|r, |cff89F559/tptpdps|r, |cff89F559/tptpheal|r - set your role\n|cff89F559/tptptoggle|r - switch between Tank and DPS\n|cff89F559/tptpverbose|r - turn chat messages of the addon on / off\n|cff89F559/tptpol|r - toggle overlapping nameplates\n\nMinimap button (icon shows your role): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. It can be hidden in the Role tab.\n\nBugs, ideas, feedback: GitHub issues at |cff00ff00github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall|r"
 								}
 							}
 						},
@@ -4930,13 +4945,17 @@ local function GetIntOptions()
 	return intoptions
 end
 
-function TidyPlatesThreat:OpenOptions()
+function TidyPlatesThreat:OpenOptions(group)
 	HideUIPanel(InterfaceOptionsFrame)
 	HideUIPanel(GameMenuFrame)
 	if not options then
 		TidyPlatesThreat:SetUpOptions()
 	end
-	LibStub("AceConfigDialog-3.0"):Open("Tidy Plates: Threat Plates")
+	local dialog = LibStub("AceConfigDialog-3.0")
+	dialog:Open("Tidy Plates: Threat Plates")
+	if type(group) == "string" then
+		dialog:SelectGroup("Tidy Plates: Threat Plates", group)
+	end
 end
 
 function TidyPlatesThreat:ChatCommand(input)

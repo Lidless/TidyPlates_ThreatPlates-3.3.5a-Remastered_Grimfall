@@ -56,6 +56,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 (or your focus / mouseover). Settings: `/tptp` → Widgets → *Mob Target*.
 
 ### Other changes
+- **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
 - **About** tab cleaned up (no donate / Discord links, no translator list).
 - All addon texts are English.
