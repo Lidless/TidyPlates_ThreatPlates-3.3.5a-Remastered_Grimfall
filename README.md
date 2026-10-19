@@ -4,7 +4,7 @@ Threat reactive nameplate theme for **Tidy Plates** on WoW 3.3.5a (WotLK), rewor
 **Grimfall** private server: the **Conquest of Azeroth (CoA)** realm with its custom classes, and the
 **classless** realm.
 
-- Original author: **Suicidal Katt**
+- Original author: **Suicidal Katt** ([WoWInterface](https://www.wowinterface.com/portal.php?&id=593))
 - 3.3.5 backport: **Kader**
 - Grimfall & classless edition: **Lidless**
 

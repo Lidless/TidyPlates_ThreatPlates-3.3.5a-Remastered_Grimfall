@@ -4125,6 +4125,12 @@ local function GetOptions()
 							name = "Original author: |cff3079ffSuicidal Katt|r",
 							order = 10
 						},
+						authorContact = {
+							type = "description",
+							name = "WoWInterface: |cff00ff00https://www.wowinterface.com/portal.php?&id=593|r",
+							order = 11,
+							width = "full"
+						},
 						seperator = {
 							type = "description",
 							name = " ",
