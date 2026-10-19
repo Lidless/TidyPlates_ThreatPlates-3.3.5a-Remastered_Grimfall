@@ -4136,6 +4136,12 @@ local function GetOptions()
 							name = "Backported by |cfff58cbaKader|r",
 							order = 13
 						},
+						backporterContact = {
+							type = "description",
+							name = "Contact: |cff00ff00bkader@mail.com|r",
+							order = 13.5,
+							width = "full"
+						},
 						seperator2 = {
 							type = "description",
 							name = " ",
