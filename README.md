@@ -17,7 +17,7 @@ Threat reactive nameplate theme for **Tidy Plates** on WoW 3.3.5a (WotLK), rewor
 
 1. Copy the `TidyPlates_ThreatPlates` folder into `Interface\AddOns\` (next to the `TidyPlates` folder).
 2. Restart the game (a `/reload` is not enough for new files).
-3. In the Tidy Plates options select **Threat Plates** as the theme.
+3. Threat Plates sets itself as the Tidy Plates theme automatically (no popup).
 4. Type `/tptp`, open the **Role** tab and choose **Tank**, **DPS** or **Healer**.
 
 ## What is different from the original
@@ -58,6 +58,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 ### Other changes
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
+- No "set your theme to Threat Plates?" popup: the theme is selected automatically.
 - **About** tab cleaned up (no donate / Discord links, no translator list).
 - All addon texts are English.
 

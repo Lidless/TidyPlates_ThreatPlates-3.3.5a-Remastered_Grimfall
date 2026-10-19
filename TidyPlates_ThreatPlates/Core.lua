@@ -1131,37 +1131,19 @@ end
 ------------
 function TidyPlatesThreat:StartUp()
 	local char = self.db.char
+	-- This addon is the theme: always use Threat Plates in Tidy Plates (both specs), no question asked.
+	-- Runs before PLAYER_ENTERING_WORLD, when Tidy Plates loads the selected theme.
+	if TidyPlatesOptions and (TidyPlatesOptions.primary ~= "Threat Plates" or TidyPlatesOptions.secondary ~= "Threat Plates") then
+		TidyPlatesOptions.primary = "Threat Plates"
+		TidyPlatesOptions.secondary = "Threat Plates"
+		print("|cff89F559Threat Plates|r: set as the Tidy Plates theme.")
+	end
 	-- Role is chosen by the player, independent of class/talents/stances
 	char.threat.tanking = (self:GetRole() == "TANK")
 
 	-- Welcome Setup / Display
 	if not char.welcome then
 		char.welcome = true
-		if ((TidyPlatesOptions.primary ~= "Threat Plates") and (TidyPlatesOptions.secondary ~= "Threat Plates")) then
-			StaticPopupDialogs["SetToThreatPlates"] = {
-				text = GetAddOnMetadata("TidyPlates_ThreatPlates", "title") .. L[":\n----------\nWould you like to \nset your theme to |cff89F559Threat Plates|r?\n\nClicking '|cff00ff00Yes|r' will set you to Threat Plates & reload UI. \n Clicking '|cffff0000No|r' will open the Tidy Plates options."],
-				button1 = YES,
-				button2 = CANCEL,
-				button3 = NO,
-				timeout = 0,
-				whileDead = 1,
-				hideOnEscape = 1,
-				OnAccept = function()
-					TidyPlatesOptions.primary = "Threat Plates"
-					TidyPlatesOptions.secondary = "Threat Plates"
-					ReloadUI()
-				end,
-				OnAlt = function()
-					InterfaceOptionsFrame_OpenToCategory("Tidy Plates")
-				end,
-				OnCancel = function()
-					if TidyPlatesThreat.db.profile.verbose then
-						print(L["-->>|cffff0000Activate Threat Plates from the Tidy Plates options!|r<<--"])
-					end
-				end
-			}
-			StaticPopup_Show("SetToThreatPlates")
-		end
 		if self.db.profile.verbose then
 			print("|cff89f559Welcome to |rTidy Plates: |cff89f559Threat Plates!|r")
 			print(L["|cff89f559Additional options can be found by typing |r'/tptp'|cff89F559.|r"])
