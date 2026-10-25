@@ -26,7 +26,7 @@ This repository contains **both addons that are needed**:
 1. Copy **both** folders, `TidyPlates` and `TidyPlates_ThreatPlates`, into `Interface\AddOns\`.
    If you already have a `TidyPlates` folder, replace it with the one from here.
 2. Restart the game (a `/reload` is not enough for new files).
-3. Make sure both are enabled in the AddOns list on the character select screen.
+3. Make sure both are **enabled** in the AddOns list.
    Threat Plates is selected as the Tidy Plates theme automatically (no popup).
 4. Type `/tptp`, open the **Role** tab and choose **Tank**, **DPS** or **Healer**.
 
