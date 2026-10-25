@@ -52,6 +52,8 @@ talents, stances or shapeshift forms. The player simply chooses:
 | **Tank** | Mobs **not attacking you** turn red, get bigger and get a glowing frame. Mobs on another known tank are not a warning. |
 | **DPS** / **Healer** | Normal while your threat is low; **orange** and slightly bigger when your threat gets high; **red, big and glowing** when the mob attacks you. |
 
+- Every mob that attacks you gets its warning, not only the first or targeted one: the threat glow of all
+  visible nameplates is checked during combat (Tidy Plates itself only refreshed it for unit-id mobs).
 - Default role is **DPS**; until a role is chosen the addon reminds you in chat (at login and when entering a dungeon / raid).
 - The old talent spec detection, stance / shapeshift / presence / aura based tank switching, the Dual Spec Roles menu and the
   LibDualSpec profile switching were removed.
