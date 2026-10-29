@@ -90,6 +90,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 | `/tptptoggle` | Switch between Tank and DPS |
 | `/tptpverbose` | Chat messages of the addon on / off |
 | `/tptpol` | Toggle overlapping nameplates |
+| `/tptpdebug` | Print the threat data of your target's nameplate (for bug reports) |
 
 ## Feedback
 
