@@ -18,9 +18,10 @@ local function UpdateThreatWidget(frame, unit)
 			threatLevel = situation -- mob is not (securely) on you
 		end
 	else
-		if unit.threatSituation == "HIGH" then
+		local situation = TidyPlatesThreat.EffectiveThreat and TidyPlatesThreat.EffectiveThreat(unit, "dps") or unit.threatSituation
+		if situation == "HIGH" then
 			threatLevel = "LOW" -- mob is attacking you
-		elseif unit.threatSituation == "MEDIUM" then
+		elseif situation == "MEDIUM" then
 			threatLevel = "MEDIUM" -- your threat is getting high
 		end
 	end

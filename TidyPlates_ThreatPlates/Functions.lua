@@ -14,8 +14,28 @@ end
 
 -- Threat situation used for warnings.
 -- As tank, a mob that is on another known tank (off-tank) is not a warning.
+local RANK = {LOW = 1, MEDIUM = 2, HIGH = 3}
+
 local function EffectiveThreat(unit, style)
 	local s = unit.threatSituation or "LOW"
+
+	-- The threat glow of the game is not always reliable (e.g. when the mob pulled you
+	-- itself it can stay hidden). Use better sources when we have them:
+	-- 1) threat API for the units that have a unit id
+	local uid = (unit.isTarget and "target") or (unit.isMouseover and "mouseover") or nil
+	if uid and UnitExists(uid) and UnitCanAttack("player", uid) then
+		local api = UnitThreatSituation("player", uid)
+		local fromApi = (api == 3 or api == 2) and "HIGH" or (api == 1 and "MEDIUM") or nil
+		if fromApi and RANK[fromApi] > RANK[s] then
+			s = fromApi
+		end
+	end
+	-- 2) the mob is attacking me (its target is me)
+	local victim = TidyPlatesThreat.GetMobTarget and TidyPlatesThreat.GetMobTarget(unit)
+	if victim and victim == UnitName("player") then
+		s = "HIGH"
+	end
+
 	if style == "tank" and s ~= "HIGH" and TidyPlatesThreat.IsTankedByOtherTank and TidyPlatesThreat.IsTankedByOtherTank(unit) then
 		return "HIGH"
 	end
@@ -49,9 +69,9 @@ do
 							return (db.nameplate.alpha["Marked"] + nonTargetAlpha), db.blizzFade.toggle
 						else
 							if TidyPlatesThreat.db.char.threat.tanking then
-								return (db.threat["tank"].alpha[unit.threatSituation] + nonTargetAlpha), db.blizzFade.toggle
+								return (db.threat["tank"].alpha[EffectiveThreat(unit, "tank")] + nonTargetAlpha), db.blizzFade.toggle
 							else
-								return (db.threat["dps"].alpha[unit.threatSituation] + nonTargetAlpha), db.blizzFade.toggle
+								return (db.threat["dps"].alpha[EffectiveThreat(unit, "dps")] + nonTargetAlpha), db.blizzFade.toggle
 							end
 						end
 					elseif not InCombatLockdown() and u.overrideAlpha then
@@ -139,9 +159,9 @@ do
 							return (db.nameplate.scale["Marked"])
 						elseif not custom then
 							if TidyPlatesThreat.db.char.threat.tanking then
-								return (db.threat["tank"].scale[unit.threatSituation] + (TypeScale(unit)))
+								return (db.threat["tank"].scale[EffectiveThreat(unit, "tank")] + (TypeScale(unit)))
 							else
-								return (db.threat["dps"].scale[unit.threatSituation] + (TypeScale(unit)))
+								return (db.threat["dps"].scale[EffectiveThreat(unit, "dps")] + (TypeScale(unit)))
 							end
 						end
 					elseif not InCombatLockdown() and u.overrideScale then
@@ -329,15 +349,15 @@ do
 										local S = db.tHPbarColor
 										return S.r, S.b, S.b
 									else
-										local T = db.settings["tank"].threatcolor[unit.threatSituation]
+										local T = db.settings["tank"].threatcolor[EffectiveThreat(unit, "tank")]
 										return T.r, T.g, T.b
 									end
 								else
-									local T = db.settings["tank"].threatcolor[unit.threatSituation]
+									local T = db.settings["tank"].threatcolor[EffectiveThreat(unit, "tank")]
 									return T.r, T.g, T.b
 								end
 							else
-								local T = db.settings["dps"].threatcolor[unit.threatSituation]
+								local T = db.settings["dps"].threatcolor[EffectiveThreat(unit, "dps")]
 								if T.a == 0 then
 									return unit.red, unit.green, unit.blue
 								end
@@ -520,10 +540,10 @@ do
 		c.r, c.g, c.b, c.a = 0, 0, 0, 0
 
 		if style == "dps" or style == "tank" or style == "normal" and InCombatLockdown() then
-			c.r = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][unit.threatSituation].r
-			c.g = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][unit.threatSituation].g
-			c.b = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][unit.threatSituation].b
-			c.a = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][unit.threatSituation].a
+			c.r = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][EffectiveThreat(unit, style)].r
+			c.g = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][EffectiveThreat(unit, style)].g
+			c.b = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][EffectiveThreat(unit, style)].b
+			c.a = TidyPlatesThreat.db.profile.settings[style]["threatcolor"][EffectiveThreat(unit, style)].a
 		end
 
 		return c.r, c.g, c.b, c.a

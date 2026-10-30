@@ -57,6 +57,9 @@ talents, stances or shapeshift forms. The player simply chooses:
 
 - Every mob that attacks you gets its warning, not only the first or targeted one: the threat glow of all
   visible nameplates is checked during combat (Tidy Plates itself only refreshed it for unit-id mobs).
+- The game's threat glow is not always reliable (e.g. a mob that pulled you itself), so the warning also uses the
+  threat API for your target / mouseover, and the "who is the mob attacking" data: a mob attacking you always
+  counts as "on you".
 - Default role is **DPS**; until a role is chosen the addon reminds you in chat (at login and when entering a dungeon / raid).
 - The old talent spec detection, stance / shapeshift / presence / aura based tank switching, the Dual Spec Roles menu and the
   LibDualSpec profile switching were removed.
