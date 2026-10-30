@@ -35,7 +35,8 @@ This repository contains **both addons that are needed**:
 ### Tidy Plates
 - **Threat Plates is the default theme** for both specs (also when you press *Reset* in the Tidy Plates options).
 - Aura widget (`widgets/DebuffWidget.lua`): can also show auras of **friendly group members** (only when the theme
-  turns it on), crowd control icons get a **glow**, and the broken icon border / glow texture paths were fixed.
+  turns it on), crowd control icons get a **glow**, icons are **square** (no stretching) with a thin border, and the broken
+  glow texture path was fixed.
 
 Everything else is the original 3.3.5 backport.
 

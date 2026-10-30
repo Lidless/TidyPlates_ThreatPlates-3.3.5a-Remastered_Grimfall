@@ -704,40 +704,42 @@ end
 -- Create an Aura Icon
 local function CreateAuraIconFrame(parent)
 	local frame = CreateFrame("Frame", nil, parent)
-	frame:SetWidth(26)
-	frame:SetHeight(14)
-	-- Icon
-	frame.Icon = frame:CreateTexture(nil, "BACKGROUND")
+	-- Square icons (Grimfall edition): the whole icon is shown without stretching
+	frame:SetWidth(18)
+	frame:SetHeight(18)
+	-- Thin black border
+	frame.Border = frame:CreateTexture(nil, "BACKGROUND")
+	frame.Border:SetPoint("TOPLEFT", -1, 1)
+	frame.Border:SetPoint("BOTTOMRIGHT", 1, -1)
+	frame.Border:SetTexture(0, 0, 0, 1)
+	-- Icon (trim the default icon edge)
+	frame.Icon = frame:CreateTexture(nil, "ARTWORK")
 	frame.Icon:SetAllPoints(frame)
-	frame.Icon:SetTexCoord(.07, 1 - .07, .23, 1 - .23) -- obj:SetTexCoord(left,right,top,bottom)
-	-- Border
-	frame.Border = frame:CreateTexture(nil, "ARTWORK")
-	frame.Border:SetWidth(32)
-	frame.Border:SetHeight(32)
-	frame.Border:SetPoint("CENTER", 1, -2)
-	frame.Border:SetTexture(AuraBorderArt)
-	-- Glow
-	frame.Glow = frame:CreateTexture(nil, "ARTWORK")
-	frame.Glow:SetAllPoints(frame.Border)
+	frame.Icon:SetTexCoord(.07, .93, .07, .93) -- obj:SetTexCoord(left,right,top,bottom)
+	-- Glow (crowd control only)
+	frame.Glow = frame:CreateTexture(nil, "OVERLAY")
+	frame.Glow:SetWidth(30)
+	frame.Glow:SetHeight(30)
+	frame.Glow:SetPoint("CENTER")
 	frame.Glow:SetTexture(AuraGlowArt)
 	frame.Glow:Hide() -- only shown on crowd control auras
-	--  Time Text
+	--  Time Text (top right corner)
 	frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
 	frame.TimeLeft:SetFont(AuraFont, 9, "OUTLINE")
 	frame.TimeLeft:SetShadowOffset(1, -1)
 	frame.TimeLeft:SetShadowColor(0, 0, 0, 1)
-	frame.TimeLeft:SetPoint("RIGHT", 0, 8)
+	frame.TimeLeft:SetPoint("TOPRIGHT", 3, 3)
 	frame.TimeLeft:SetWidth(26)
-	frame.TimeLeft:SetHeight(16)
+	frame.TimeLeft:SetHeight(10)
 	frame.TimeLeft:SetJustifyH("RIGHT")
-	--  Stacks
+	--  Stacks (bottom right corner)
 	frame.Stacks = frame:CreateFontString(nil, "OVERLAY")
 	frame.Stacks:SetFont(AuraFont, 10, "OUTLINE")
 	frame.Stacks:SetShadowOffset(1, -1)
 	frame.Stacks:SetShadowColor(0, 0, 0, 1)
-	frame.Stacks:SetPoint("RIGHT", 0, -6)
+	frame.Stacks:SetPoint("BOTTOMRIGHT", 3, -3)
 	frame.Stacks:SetWidth(26)
-	frame.Stacks:SetHeight(16)
+	frame.Stacks:SetHeight(10)
 	frame.Stacks:SetJustifyH("RIGHT")
 	-- Information about the currently displayed aura
 	frame.AuraInfo = {Name = "", Icon = "", Stacks = 0, Expiration = 0, Type = ""}
