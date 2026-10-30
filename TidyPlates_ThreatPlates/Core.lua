@@ -1087,7 +1087,9 @@ function TidyPlatesThreat.SetStyle(unit)
 			if DB.nameplate.toggle[T] then
 				if DB.threat.toggle[T] and DB.threat.ON and unit.class == "UNKNOWN" and InCombatLockdown() then
 					if DB.threat.nonCombat then
-						if unit.isInCombat or (unit.health < unit.healthmax) then
+						-- In combat with us: red name (not reliable on every server), damaged, or we have
+						-- threat on it (a DoT as opener leaves full health and no red name for a while)
+						if unit.isInCombat or (unit.health < unit.healthmax) or (unit.threatSituation and unit.threatSituation ~= "LOW") then
 							if TidyPlatesThreat.db.char.threat.tanking then
 								return "tank"
 							else

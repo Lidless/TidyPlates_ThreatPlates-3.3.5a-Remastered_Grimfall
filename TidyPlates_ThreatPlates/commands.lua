@@ -106,6 +106,11 @@ local function TPTPDEBUG()
 	local style = TidyPlatesThreat.SetStyle(u)
 	print(p .. "plate: glow=" .. gs .. " threatSituation=" .. tostring(u.threatSituation) .. " style=" .. tostring(style)
 		.. " class=" .. tostring(u.class) .. " reaction=" .. tostring(u.reaction) .. " type=" .. tostring(u.type))
+	local eff = TidyPlatesThreat.EffectiveThreat and TidyPlatesThreat.EffectiveThreat(u, style) or "?"
+	local victim = TidyPlatesThreat.GetMobTarget and TidyPlatesThreat.GetMobTarget(u) or "?"
+	print(p .. "effective threat=" .. tostring(eff) .. " mob target=" .. tostring(victim) .. " me=" .. tostring(UnitName("player"))
+		.. " art=" .. tostring(TidyPlatesThreat.db.profile.threat.art.ON) .. " useScale=" .. tostring(TidyPlatesThreat.db.profile.threat.useScale)
+		.. " dpsScaleHIGH=" .. tostring(TidyPlatesThreat.db.profile.threat.dps.scale.HIGH))
 	print(p .. "plate: isInCombat=" .. tostring(u.isInCombat) .. " health=" .. tostring(u.health) .. "/" .. tostring(u.healthmax)
 		.. " elite=" .. tostring(u.isElite) .. " boss=" .. tostring(u.isBoss) .. " marked=" .. tostring(u.isMarked))
 end

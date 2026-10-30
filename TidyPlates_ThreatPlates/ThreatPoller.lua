@@ -54,6 +54,14 @@ poller:SetScript("OnUpdate", function(self, elapsed)
 	for plate in pairs(visible) do
 		local regions = plate.extended and plate.extended.regions
 		local state = GlowState(regions and regions.threatglow)
+		-- also refresh when the mob first takes damage (e.g. DoT ticks after a DoT opener)
+		local bar = plate.extended and plate.extended.bars and plate.extended.bars.health
+		if bar then
+			local _, max = bar:GetMinMaxValues()
+			if max and bar:GetValue() < max then
+				state = state .. "-damaged"
+			end
+		end
 		if lastState[plate] ~= state then
 			lastState[plate] = state
 			update(plate)
