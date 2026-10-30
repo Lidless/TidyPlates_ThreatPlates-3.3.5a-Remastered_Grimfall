@@ -91,14 +91,50 @@ DebuffFilterModes.prefix = function(debuff, list)
 	end
 end
 
---DebuffFilterFunction
+local AURA_TYPE_BUFF = 1
+
+local function IsCC(debuff)
+	local cc = TidyPlatesWidgets.CCSpells
+	return cc and debuff.name and cc[debuff.name] and true or false
+end
+
+-- Friendly auras are enabled in "Friendly Targets"
+TidyPlatesWidgets.AllowFriendlyAuras = function()
+	local p = TidyPlatesThreat.db and TidyPlatesThreat.db.profile
+	local f = p and p.friendlyAuras
+	return f and (f.buffs or f.cc) and true or false
+end
+
+--DebuffFilterFunction: returns show, priority (lower = shown first)
 local function DebuffFilter(debuff)
-	-- Debuffs on Friendly Units
+	db = TidyPlatesThreat.db.profile
+
+	-- Friendly players: my HoTs / short buffs, and crowd control on them
 	if debuff.target == 2 then -- AURA_TARGET_FRIENDLY
+		local f = db.friendlyAuras
+		if not f then
+			return false
+		end
+		if debuff.type == AURA_TYPE_BUFF then
+			local dur = debuff.duration or 0
+			if f.buffs and debuff.caster == PlayerGUID() and dur > 0 and dur <= (f.maxDuration or 60) then
+				return true, 5
+			end
+			return false
+		end
+		if f.cc and IsCC(debuff) then
+			return true, 1
+		end
 		return false
 	end
 
-	db = TidyPlatesThreat.db.profile
+	-- Enemies
+	if not db.debuffWidget.ON then
+		return false
+	end
+	if db.debuffWidget.showCC and IsCC(debuff) then
+		return true, 1 -- crowd control first, from anyone
+	end
 	return DebuffFilterModes[db.debuffWidget.mode](debuff, db.debuffWidget.filter)
 end
 ----------------
@@ -108,7 +144,7 @@ local function OnInitialize(plate)
 	db = TidyPlatesThreat.db.profile
 	local w = plate.widgets
 	-- Debuff Widget
-	if db.debuffWidget.ON then
+	if db.debuffWidget.ON or TidyPlatesWidgets.AllowFriendlyAuras() then
 		if not w.WidgetDebuff then
 			local widget = TidyPlatesWidgets.CreateAuraWidget(plate)
 			widget:SetPoint("CENTER", plate, db.debuffWidget.x, db.debuffWidget.y)
@@ -262,7 +298,7 @@ local function OnContextUpdate(plate, unit)
 	db = TidyPlatesThreat.db.profile
 	local w = plate.widgets
 	-- Debuff Widget
-	if db.debuffWidget.ON then
+	if db.debuffWidget.ON or TidyPlatesWidgets.AllowFriendlyAuras() then
 		if not w.WidgetDebuff then
 			OnInitialize(plate)
 		end

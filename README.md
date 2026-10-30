@@ -33,8 +33,11 @@ This repository contains **both addons that are needed**:
 ## What is different from the original
 
 ### Tidy Plates
-The only change: **Threat Plates is the default theme** for both specs (also when you press *Reset* in the
-Tidy Plates options). Everything else is the original 3.3.5 backport.
+- **Threat Plates is the default theme** for both specs (also when you press *Reset* in the Tidy Plates options).
+- Aura widget (`widgets/DebuffWidget.lua`): can also show auras of **friendly group members** (only when the theme
+  turns it on), crowd control icons get a **glow**, and the broken icon border / glow texture paths were fixed.
+
+Everything else is the original 3.3.5 backport.
 
 ### Threat Plates
 
@@ -72,6 +75,12 @@ Roles of group members come from:
 
 Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you or a group member
 (or your focus / mouseover). Settings: `/tptp` → Widgets → *Mob Target*.
+
+#### DoTs, crowd control and HoTs on nameplates
+- **Enemies** (`/tptp` → Widgets → Debuffs, now on by default): your own DoTs / debuffs with the time left, plus
+  **crowd control from anyone** (stun, fear, polymorph...) marked with a glow. Mode can be changed (all debuffs, lists...).
+- **Friendly Targets** tab: your **HoTs and short buffs** and **crowd control** on party / raid members' nameplates
+  (both off by default; friendly nameplates must be shown, Shift+V or the switch in the tab).
 
 #### Other changes
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.

@@ -597,10 +597,11 @@ function TidyPlatesThreat:OnInitialize()
 				anchor = "CENTER"
 			},
 			debuffWidget = {
-				ON = false,
+				ON = true,
+				showCC = true, -- crowd control from anyone, besides the selected mode
 				x = 32,
 				y = 32,
-				mode = "all",
+				mode = "allMine",
 				scale = 1,
 				anchor = "CENTER",
 				filter = {}
@@ -631,6 +632,11 @@ function TidyPlatesThreat:OnInitialize()
 				b = 0.2666666666666667,
 				a = 1,
 				inverted = true
+			},
+			friendlyAuras = {
+				buffs = false, -- my HoTs / short buffs on friendly player nameplates
+				cc = false, -- crowd control on friendly players
+				maxDuration = 60 -- seconds; longer buffs (e.g. 1 hour buffs) are not shown
 			},
 			minimap = {
 				hide = false,

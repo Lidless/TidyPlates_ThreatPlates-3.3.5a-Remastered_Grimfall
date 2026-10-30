@@ -531,6 +531,20 @@ local function GetOptions()
 								}
 							}
 						},
+						Auras = {
+							name = "DoTs, CC and HoTs on nameplates",
+							type = "group",
+							inline = true,
+							order = 3.5,
+							args = {
+								Text = {
+									type = "description",
+									fontSize = "medium",
+									order = 1,
+									name = "|cff89F559Enemies|r (Widgets -> Debuffs): by default your own DoTs / debuffs are shown above the nameplate with the time left, plus crowd control (stun, fear, polymorph...) from anyone, marked with a glow. The mode can be changed (all debuffs, white / black list...).\n\n|cff89F559Friendly players|r (Friendly Targets tab): your HoTs and short buffs, and crowd control on party / raid members. Friendly nameplates must be shown (Shift+V).\n\nLimit of the 3.3.5 client: exact durations are known for your target, focus, mouseover and group members; on other mobs the effects come from the combat log."
+								}
+							}
+						},
 						Commands = {
 							name = "Chat commands",
 							type = "group",
@@ -3482,6 +3496,96 @@ local function GetOptions()
 						}
 					}
 				},
+				-- Friendly targets (group members' nameplates)
+				FriendlyTargets = {
+					name = "Friendly Targets",
+					type = "group",
+					order = 35,
+					args = {
+						Info = {
+							type = "description",
+							order = 1,
+							fontSize = "medium",
+							name = "Effects on the nameplates of |cff40FF40friendly players in your party / raid|r. Friendly nameplates must be shown in the game (key |cff89F559Shift+V|r, or the switch below).\n"
+						},
+						ShowFriendly = {
+							name = "Show friendly nameplates",
+							type = "toggle",
+							order = 2,
+							width = "double",
+							desc = "Same as Shift+V in the game.",
+							get = function()
+								return GetCVar("nameplateShowFriends") == "1"
+							end,
+							set = function(info, val)
+								SetCVar("nameplateShowFriends", val and 1 or 0)
+							end
+						},
+						Effects = {
+							name = "Effects",
+							type = "group",
+							inline = true,
+							order = 3,
+							args = {
+								Buffs = {
+									name = "My HoTs and short buffs",
+									type = "toggle",
+									order = 1,
+									width = "double",
+									desc = "Your heal over time effects, shields and other short buffs on group members, with the time left.",
+									descStyle = "inline",
+									get = function()
+										return db.friendlyAuras.buffs
+									end,
+									set = function(info, val)
+										db.friendlyAuras.buffs = val
+										Update()
+									end
+								},
+								MaxDuration = {
+									name = "Longest buff to show (seconds)",
+									type = "range",
+									order = 2,
+									width = "double",
+									min = 10,
+									max = 600,
+									step = 5,
+									desc = "Buffs longer than this (e.g. 30 minute or 1 hour buffs) are not shown, so only HoTs and short effects remain.",
+									disabled = function()
+										return not db.friendlyAuras.buffs
+									end,
+									get = function()
+										return db.friendlyAuras.maxDuration
+									end,
+									set = function(info, val)
+										db.friendlyAuras.maxDuration = val
+										Update()
+									end
+								},
+								CC = {
+									name = "Crowd control on group members",
+									type = "toggle",
+									order = 3,
+									width = "double",
+									desc = "Stun, fear, polymorph, root, silence... on a group member, shown with a glow.",
+									descStyle = "inline",
+									get = function()
+										return db.friendlyAuras.cc
+									end,
+									set = function(info, val)
+										db.friendlyAuras.cc = val
+										Update()
+									end
+								}
+							}
+						},
+						Note = {
+							type = "description",
+							order = 4,
+							name = "\nIcon size and position are the same as for enemies: |cff89F559Widgets -> Debuffs|r."
+						}
+					}
+				},
 				Widgets = {
 					name = L["Widgets"],
 					type = "group",
@@ -3765,6 +3869,15 @@ local function GetOptions()
 											width = "double",
 											values = DebuffMode,
 											arg = {"debuffWidget", "mode"}
+										},
+										ShowCC = {
+											name = "Also show crowd control from anyone",
+											type = "toggle",
+											order = 1.5,
+											width = "double",
+											desc = "Stuns, fears, polymorph, roots, silences... on enemies are shown (with a glow) whoever cast them, besides the debuffs of the selected mode.",
+											descStyle = "inline",
+											arg = {"debuffWidget", "showCC"}
 										},
 										DebuffList = {
 											name = L["Filtered Debuffs"],

@@ -28,6 +28,13 @@ local AURA_TYPE = {
 	["Debuff"] = 6
 }
 
+-- Friendly auras (buffs / debuffs on friendly players) are off unless the theme
+-- sets TidyPlatesWidgets.AllowFriendlyAuras to a function returning true.
+local function FriendlyAurasAllowed()
+	local f = TidyPlatesWidgets.AllowFriendlyAuras
+	return f and f() and true or false
+end
+
 local function GetAuraWidgetByGUID(guid)
 	if guid then
 		return WidgetGUID[guid]
@@ -286,7 +293,7 @@ local function UpdateAurasByUnitID(unitid)
 	else
 		unitType = AURA_TARGET_HOSTILE
 	end
-	if unitType == AURA_TARGET_FRIENDLY then
+	if unitType == AURA_TARGET_FRIENDLY and not FriendlyAurasAllowed() then
 		return
 	end -- Filter
 
@@ -321,6 +328,9 @@ local function UpdateAurasByUnitID(unitid)
 	local raidicon, name
 	if UnitPlayerControlled(unitid) then
 		name = UnitName(unitid)
+		if name and guid then
+			ByName[name] = guid
+		end
 	end
 	raidicon = RaidIconIndex[GetRaidTargetIndex(unitid) or ""]
 	if raidicon then
@@ -396,6 +406,9 @@ local function EventUnitAura(unitid)
 		UpdateAurasByUnitID("target")
 	elseif unitid == "focus" then
 		UpdateAurasByUnitID("focus")
+	elseif unitid and FriendlyAurasAllowed() and (unitid:match("^party%d$") or unitid:match("^raid%d+$")) then
+		-- group members: HoTs / buffs / CC on friendly player nameplates
+		UpdateAurasByUnitID(unitid)
 	end
 end
 
@@ -561,6 +574,13 @@ local function UpdateIconGrid(frame, guid)
 			local cachedaura = DebuffCache[index]
 			if cachedaura.spellid and cachedaura.expiration then
 				UpdateIcon(AuraIconFrames[AuraSlotIndex], cachedaura.texture, cachedaura.expiration, cachedaura.stacks)
+				-- highlight crowd control
+				local glow = AuraIconFrames[AuraSlotIndex].Glow
+				if TidyPlatesWidgets.CCSpells and cachedaura.name and TidyPlatesWidgets.CCSpells[cachedaura.name] then
+					glow:Show()
+				else
+					glow:Hide()
+				end
 				AuraSlotIndex = AuraSlotIndex + 1
 			end
 			if AuraSlotIndex > MaximumDisplayableDebuffs then
@@ -632,6 +652,13 @@ local function UpdateWidgetContext(frame, unit)
 	end
 	if unit.type == "PLAYER" and unit.reaction == "HOSTILE" then
 		name = unit.name
+	elseif unit.type == "PLAYER" and unit.reaction == "FRIENDLY" and FriendlyAurasAllowed() then
+		name = unit.name
+		local group = TidyPlatesUtility.GroupMembers
+		local unitid = group and group.UnitId and group.UnitId[unit.name]
+		if unitid then
+			UpdateAurasByUnitID(unitid)
+		end
 	end
 
 	CallForWidgetUpdate(guid, raidicon, name)
@@ -648,9 +675,9 @@ end
 -------------------------------------------------------------
 -- Widget Frames
 -------------------------------------------------------------
-local AuraBorderArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraFrame" -- FINISH ART
-local AuraGlowArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\AuraGlow"
-local AuraHighlightArt = "Interface\\AddOns\\TidyPlatesWidgets\\Aura\\CCBorder" -- AuraBorderArt, AuraHighlightArt
+local AuraBorderArt = "Interface\\AddOns\\TidyPlates\\widgets\\Aura\\AuraFrame" -- FINISH ART
+local AuraGlowArt = "Interface\\AddOns\\TidyPlates\\widgets\\Aura\\AuraGlow"
+local AuraHighlightArt = "Interface\\AddOns\\TidyPlates\\widgets\\Aura\\CCBorder" -- AuraBorderArt, AuraHighlightArt
 local AuraTestArt = ""
 local AuraFont = "Interface\\Addons\\TidyPlates\\Media\\DefaultFont.ttf"
 
@@ -693,6 +720,7 @@ local function CreateAuraIconFrame(parent)
 	frame.Glow = frame:CreateTexture(nil, "ARTWORK")
 	frame.Glow:SetAllPoints(frame.Border)
 	frame.Glow:SetTexture(AuraGlowArt)
+	frame.Glow:Hide() -- only shown on crowd control auras
 	--  Time Text
 	frame.TimeLeft = frame:CreateFontString(nil, "OVERLAY")
 	frame.TimeLeft:SetFont(AuraFont, 9, "OUTLINE")
