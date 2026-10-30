@@ -116,6 +116,7 @@ function TidyPlatesThreat:OnInitialize()
 			aHPbarColor = {r = 0, g = 1, b = 0},
 			bHPbarColor = {r = 1, g = 0, b = 0},
 			fHPbarColor = {r = 0.2862745098039216, g = 0.8352941176470589, b = 0.4431372549019608},
+			fPlayerHPbarColor = {r = 0.4, g = 0.75, b = 1}, -- friendly players: light blue (NPCs keep fHPbarColor)
 			nHPbarColor = {r = 1, g = 0.9058823529411765, b = 0.196078431372549},
 			HPbarColor = {r = 1, g = 0.2627450980392157, b = 0.2941176470588235},
 			tHPbarColor = {r = 0, g = 0.5, b = 1},

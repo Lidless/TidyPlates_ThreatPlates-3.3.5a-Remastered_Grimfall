@@ -87,6 +87,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   (both off by default; friendly nameplates must be shown, Shift+V or the switch in the tab).
 
 #### Other changes
+- **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
+  (color: `/tptp` → Nameplate Settings → health bar colors → *Friendly Player Color*).
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
 - No "set your theme to Threat Plates?" popup: the theme is selected automatically.

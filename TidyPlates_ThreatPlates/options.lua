@@ -1068,9 +1068,18 @@ local function GetOptions()
 														FriendlyColor = {
 															name = L["Friendly Color"],
 															type = "color",
+															desc = "Friendly NPCs.",
 															get = GetColor,
 															set = SetColor,
 															arg = {"fHPbarColor"}
+														},
+														FriendlyPlayerColor = {
+															name = "Friendly Player Color",
+															type = "color",
+															desc = "Friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
+															get = GetColor,
+															set = SetColor,
+															arg = {"fPlayerHPbarColor"}
 														},
 														NeutralColor = {
 															name = L["Neutral Color"],
