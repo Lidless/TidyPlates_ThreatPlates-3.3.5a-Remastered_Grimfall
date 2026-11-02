@@ -92,6 +92,7 @@ DebuffFilterModes.prefix = function(debuff, list)
 end
 
 local AURA_TYPE_BUFF = 1
+local DISPEL_TYPE_NAME = {[2] = "Curse", [3] = "Disease", [4] = "Magic", [5] = "Poison"}
 
 local function IsCC(debuff)
 	local cc = TidyPlatesWidgets.CCSpells
@@ -123,7 +124,10 @@ local function DebuffFilter(debuff)
 			return false
 		end
 		if f.cc and IsCC(debuff) then
-			return true, 1
+			-- blink if the player marked this dispel type as one they can remove
+			local dt = DISPEL_TYPE_NAME[debuff.type]
+			local blink = dt and f.dispel and f.dispel[dt] and true or false
+			return true, 1, blink
 		end
 		return false
 	end

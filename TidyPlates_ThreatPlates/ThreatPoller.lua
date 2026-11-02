@@ -44,16 +44,13 @@ poller:SetScript("OnUpdate", function(self, elapsed)
 		return
 	end
 
-	if not InCombatLockdown() then
-		if next(lastState) then
-			wipe(lastState)
-		end
-		return
-	end
+	-- Out of combat only the "damaged" state matters (friendly name-only players switch to a
+	-- health bar while damaged); in combat the threat glow too.
+	local inCombat = InCombatLockdown()
 
 	for plate in pairs(visible) do
 		local regions = plate.extended and plate.extended.regions
-		local state = GlowState(regions and regions.threatglow)
+		local state = inCombat and GlowState(regions and regions.threatglow) or "OOC"
 		-- also refresh when the mob first takes damage (e.g. DoT ticks after a DoT opener)
 		local bar = plate.extended and plate.extended.bars and plate.extended.bars.health
 		if bar then

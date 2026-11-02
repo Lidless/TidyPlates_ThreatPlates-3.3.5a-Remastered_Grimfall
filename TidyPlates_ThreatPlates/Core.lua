@@ -637,8 +637,13 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyAuras = {
 				buffs = false, -- my HoTs / short buffs on friendly player nameplates
 				cc = false, -- crowd control on friendly players
+				dispel = {Magic = false, Curse = false, Poison = false, Disease = false}, -- what I can remove: these CC icons blink
 				maxDuration = 60 -- seconds; longer buffs (e.g. 1 hour buffs) are not shown
 			},
+			friendlyPlayerMode = "bar", -- "bar" (light blue health bar) or "name" (name only, bar while damaged)
+			executeLine = {ON = false, percent = 20},
+			castHighlight = {ON = false, learn = true, spells = {}},
+			purgeArrow = {ON = true},
 			minimap = {
 				hide = false,
 				angle = 225
@@ -1118,6 +1123,9 @@ function TidyPlatesThreat.SetStyle(unit)
 			end
 		elseif unit.reaction == "FRIENDLY" then
 			if DB.friendlyNameOnly then
+				return "text"
+			elseif unit.type == "PLAYER" and DB.friendlyPlayerMode == "name" and unit.health and unit.healthmax and unit.health >= unit.healthmax then
+				-- friendly players: name only while at full health, health bar while damaged
 				return "text"
 			elseif DB.nameplate.toggle[T] then
 				return "normal"

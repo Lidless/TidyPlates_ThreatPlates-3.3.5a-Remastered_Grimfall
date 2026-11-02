@@ -35,7 +35,7 @@ This repository contains **both addons that are needed**:
 ### Tidy Plates
 - **Threat Plates is the default theme** for both specs (also when you press *Reset* in the Tidy Plates options).
 - Aura widget (`widgets/DebuffWidget.lua`): can also show auras of **friendly group members** (only when the theme
-  turns it on), crowd control icons get a **glow**, icons are **square** (no stretching) with a thin border, and the broken
+  turns it on), crowd control icons get a **glow** (and can **blink** when the theme asks), icons are **square** (no stretching) with a thin border, and the broken
   glow texture path was fixed.
 
 Everything else is the original 3.3.5 backport.
@@ -85,6 +85,17 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   **crowd control from anyone** (stun, fear, polymorph...) marked with a glow. Mode can be changed (all debuffs, lists...).
 - **Friendly Targets** tab: your **HoTs and short buffs** and **crowd control** on party / raid members' nameplates
   (both off by default; friendly nameplates must be shown, Shift+V or the switch in the tab).
+
+#### Execute line, cast highlight, dispellable buffs
+- **Execute line** (`/tptp` → Nameplate Settings → Enemy Nameplates, off by default): vertical mark on enemy health bars
+  at the set health %.
+- **Cast highlight** (same place, off by default): the castbar blinks with a red border when an enemy casts a spell
+  from your list. Spells interrupted by you or your group are **learned automatically**.
+- **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a
+  magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
+- **Friendly Targets**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
+  icons on group members **blink**.
+- **Friendly Players** (Nameplate Settings): light blue health bar, or **name only** (the bar appears while damaged).
 
 #### Other changes
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities

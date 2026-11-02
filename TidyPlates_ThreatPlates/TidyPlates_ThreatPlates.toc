@@ -20,4 +20,5 @@ Widgets.xml
 Options.lua
 MinimapButton.lua
 ThreatPoller.lua
+Extras.lua
 Styles.xml

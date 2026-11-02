@@ -545,6 +545,20 @@ local function GetOptions()
 								}
 							}
 						},
+						EnemyExtras = {
+							name = "Execute line, cast highlight, dispellable buffs",
+							type = "group",
+							inline = true,
+							order = 3.6,
+							args = {
+								Text = {
+									type = "description",
+									fontSize = "medium",
+									order = 1,
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly Targets|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly Players|r: light blue health bar, or name only (the bar appears while the player is damaged)."
+								}
+							}
+						},
 						Commands = {
 							name = "Chat commands",
 							type = "group",
@@ -746,6 +760,147 @@ local function GetOptions()
 											}
 										}
 									}
+								}
+							}
+						},
+						EnemyNameplates = {
+							name = "Enemy Nameplates",
+							type = "group",
+							order = 12,
+							args = {
+								Execute = {
+									name = "Execute Line",
+									type = "group",
+									inline = true,
+									order = 1,
+									args = {
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											desc = "A vertical line on enemy health bars at the set health %, so you see when the execute phase starts.",
+											descStyle = "inline",
+											get = function()
+												return db.executeLine.ON
+											end,
+											set = function(info, val)
+												db.executeLine.ON = val
+											end
+										},
+										Percent = {
+											name = "Health %",
+											type = "range",
+											order = 2,
+											min = 1,
+											max = 99,
+											step = 1,
+											disabled = function()
+												return not db.executeLine.ON
+											end,
+											get = function()
+												return db.executeLine.percent
+											end,
+											set = function(info, val)
+												db.executeLine.percent = val
+											end
+										}
+									}
+								},
+								CastHighlight = {
+									name = "Cast Highlight (interrupt these!)",
+									type = "group",
+									inline = true,
+									order = 2,
+									args = {
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											desc = "The castbar of an enemy blinks with a red border when it casts a spell from the list below.",
+											descStyle = "inline",
+											get = function()
+												return db.castHighlight.ON
+											end,
+											set = function(info, val)
+												db.castHighlight.ON = val
+											end
+										},
+										Learn = {
+											name = "Learn interrupted spells automatically",
+											type = "toggle",
+											order = 2,
+											width = "double",
+											desc = "When you or a group member interrupts an enemy cast, that spell is added to the list.",
+											descStyle = "inline",
+											disabled = function()
+												return not db.castHighlight.ON
+											end,
+											get = function()
+												return db.castHighlight.learn
+											end,
+											set = function(info, val)
+												db.castHighlight.learn = val
+											end
+										},
+										List = {
+											name = "Spells (one per line, name or spell ID)",
+											type = "input",
+											order = 3,
+											multiline = 10,
+											width = "full",
+											disabled = function()
+												return not db.castHighlight.ON
+											end,
+											get = function()
+												local names = {}
+												for name in pairs(db.castHighlight.spells or {}) do
+													names[#names + 1] = name
+												end
+												table.sort(names)
+												return table.concat(names, "\n")
+											end,
+											set = function(info, val)
+												db.castHighlight.spells = {}
+												for line in string.gmatch(val or "", "[^\n]+") do
+													line = strtrim(line)
+													if line ~= "" then
+														TidyPlatesThreat.AddHighlightSpell(line)
+													end
+												end
+											end
+										}
+									}
+								}
+							}
+						},
+						FriendlyPlayers = {
+							name = "Friendly Players",
+							type = "group",
+							order = 14,
+							args = {
+								Mode = {
+									name = "Friendly player nameplates",
+									type = "select",
+									order = 1,
+									width = "double",
+									values = {
+										bar = "Light blue health bar",
+										name = "Name only (health bar while damaged)"
+									},
+									get = function()
+										return db.friendlyPlayerMode or "bar"
+									end,
+									set = function(info, val)
+										db.friendlyPlayerMode = val
+										Update()
+									end
+								},
+								Note = {
+									type = "description",
+									order = 2,
+									name = "\nWith 'Name only' a friendly player shows just the name; when they take damage the light blue health bar appears until they are back at full health. Friendly NPCs are not affected. The light blue color can be changed under Healthbar -> Coloring (Friendly Player Color)."
 								}
 							}
 						},
@@ -3571,6 +3726,24 @@ local function GetOptions()
 										Update()
 									end
 								},
+								Dispel = {
+									name = "I can remove (these CC icons blink)",
+									type = "multiselect",
+									order = 4,
+									width = "double",
+									values = {Magic = "Magic", Curse = "Curse", Poison = "Poison", Disease = "Disease"},
+									disabled = function()
+										return not db.friendlyAuras.cc
+									end,
+									get = function(info, key)
+										return db.friendlyAuras.dispel and db.friendlyAuras.dispel[key]
+									end,
+									set = function(info, key, val)
+										db.friendlyAuras.dispel = db.friendlyAuras.dispel or {}
+										db.friendlyAuras.dispel[key] = val
+										Update()
+									end
+								},
 								CC = {
 									name = "Crowd control on group members",
 									type = "toggle",
@@ -3878,6 +4051,20 @@ local function GetOptions()
 											width = "double",
 											values = DebuffMode,
 											arg = {"debuffWidget", "mode"}
+										},
+										PurgeArrow = {
+											name = "Arrow for dispellable buffs",
+											type = "toggle",
+											order = 1.6,
+											width = "double",
+											desc = "A blinking arrow left of the debuff icons when the enemy has a magic or enrage buff that can be purged / dispelled.",
+											descStyle = "inline",
+											get = function()
+												return db.purgeArrow.ON
+											end,
+											set = function(info, val)
+												db.purgeArrow.ON = val
+											end
 										},
 										ShowCC = {
 											name = "Also show crowd control from anyone",

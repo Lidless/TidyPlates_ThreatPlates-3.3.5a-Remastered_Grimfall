@@ -10,6 +10,7 @@ local weaktable = TidyPlatesUtility.weaktable
 local WidgetGUID = setmetatable({}, weaktable)
 
 local UpdateWidget
+local SetBlinking
 local TargetOfGroupMembers = {}
 local MaximumDisplayableDebuffs = 6
 
@@ -534,6 +535,27 @@ end
 
 local DebuffCache = {}
 
+-- Blinking glows (pulsing alpha)
+local Blinking = {}
+local BlinkDriver = CreateFrame("Frame")
+local blinkTime = 0
+BlinkDriver:SetScript("OnUpdate", function(self, elapsed)
+	blinkTime = blinkTime + elapsed
+	local a = 0.25 + 0.75 * math.abs(math.sin(blinkTime * 5))
+	for tex in pairs(Blinking) do
+		tex:SetAlpha(a)
+	end
+end)
+
+SetBlinking = function(tex, on)
+	if on then
+		Blinking[tex] = true
+	else
+		Blinking[tex] = nil
+		tex:SetAlpha(1)
+	end
+end
+
 local function UpdateIconGrid(frame, guid)
 	local AuraIconFrames = frame.AuraIconFrames
 	local AurasOnUnit = GetAuraList(guid)
@@ -555,8 +577,9 @@ local function UpdateIconGrid(frame, guid)
 				aura.unit = frame.unit
 
 				-- Call Filter Function
-				local show, priority = frame.Filter(aura)
+				local show, priority, blink = frame.Filter(aura)
 				aura.priority = priority or 10
+				aura.blink = blink
 
 				-- Get Order/Priority
 				if show and aura.expiration > GetTime() then
@@ -574,13 +597,14 @@ local function UpdateIconGrid(frame, guid)
 			local cachedaura = DebuffCache[index]
 			if cachedaura.spellid and cachedaura.expiration then
 				UpdateIcon(AuraIconFrames[AuraSlotIndex], cachedaura.texture, cachedaura.expiration, cachedaura.stacks)
-				-- highlight crowd control
+				-- highlight crowd control; blinking if the theme says so (e.g. dispellable by the player)
 				local glow = AuraIconFrames[AuraSlotIndex].Glow
-				if TidyPlatesWidgets.CCSpells and cachedaura.name and TidyPlatesWidgets.CCSpells[cachedaura.name] then
+				if cachedaura.blink or (TidyPlatesWidgets.CCSpells and cachedaura.name and TidyPlatesWidgets.CCSpells[cachedaura.name]) then
 					glow:Show()
 				else
 					glow:Hide()
 				end
+				SetBlinking(glow, cachedaura.blink)
 				AuraSlotIndex = AuraSlotIndex + 1
 			end
 			if AuraSlotIndex > MaximumDisplayableDebuffs then
@@ -592,6 +616,7 @@ local function UpdateIconGrid(frame, guid)
 	-- Clear Extra Slots
 	for index = AuraSlotIndex, MaximumDisplayableDebuffs do
 		UpdateIcon(AuraIconFrames[index])
+		SetBlinking(AuraIconFrames[index].Glow, false)
 	end
 
 	wipe(DebuffCache)
