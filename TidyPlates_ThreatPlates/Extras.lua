@@ -10,8 +10,8 @@
 --                         others 3 times (the client has no role info for enemies).
 --   * Threat %          : threat number above the health bar of your target / mouseover /
 --                         focus (the game gives numbers only for these). DPS / Healer: how
---                         close you are to pulling (100% = you pull); Tank: the highest
---                         threat of the others compared to you.
+--                         close you are to pulling (100% = you pull); Tank: own threat,
+--                         100% = the mob is on you, lower = someone else has it.
 --   * Quest mobs        : yellow "!" with the progress (3/10) on mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
 --                         from tooltips (any line naming an objective / quest) and from loot.
@@ -173,38 +173,6 @@ local function PlateUnitId(unit)
 	end
 end
 
-local function HighestOtherThreat(uid)
-	local best
-	local raid = GetNumRaidMembers()
-	local n, prefix = raid, "raid"
-	if raid == 0 then
-		n, prefix = GetNumPartyMembers(), "party"
-	end
-	for i = 1, n do
-		local member = prefix .. i
-		if not UnitIsUnit(member, "player") then
-			local _, _, pct = UnitDetailedThreatSituation(member, uid)
-			if pct and (not best or pct > best) then
-				best = pct
-			end
-			local pet = prefix .. "pet" .. i
-			if UnitExists(pet) then
-				_, _, pct = UnitDetailedThreatSituation(pet, uid)
-				if pct and (not best or pct > best) then
-					best = pct
-				end
-			end
-		end
-	end
-	if UnitExists("pet") then
-		local _, _, pct = UnitDetailedThreatSituation("pet", uid)
-		if pct and (not best or pct > best) then
-			best = pct
-		end
-	end
-	return best
-end
-
 -- returns text, r, g, b (nil = nothing to show)
 local function ThreatText(unit)
 	local uid = PlateUnitId(unit)
@@ -213,23 +181,20 @@ local function ThreatText(unit)
 	end
 	local isTanking, _, pct = UnitDetailedThreatSituation("player", uid)
 	if TidyPlatesThreat:GetRole() == "TANK" then
+		-- tank: own threat. 100% white = the mob is on you; below 100% someone else has it:
+		-- orange from 90% (you take it back soon), yellow from 70%, red below
 		if isTanking then
-			local other = HighestOtherThreat(uid)
-			if not other then
-				return
-			end
-			other = math.floor(other + 0.5)
-			if other >= 90 then
-				return other .. "%", 1, 0.2, 0.2
-			elseif other >= 70 then
-				return other .. "%", 1, 0.6, 0.1
-			end
-			return other .. "%", 0.3, 1, 0.3
-		elseif pct then
-			-- the mob is not on you: your own threat compared to the one who has it
-			return math.floor(pct + 0.5) .. "%", 1, 0.2, 0.2
+			return "100%", 1, 1, 1
+		elseif not pct then
+			return
 		end
-		return
+		pct = math.floor(pct + 0.5)
+		if pct >= 90 then
+			return pct .. "%", 1, 0.6, 0.1
+		elseif pct >= 70 then
+			return pct .. "%", 1, 1, 0.2
+		end
+		return pct .. "%", 1, 0.2, 0.2
 	end
 	if not pct then
 		return
