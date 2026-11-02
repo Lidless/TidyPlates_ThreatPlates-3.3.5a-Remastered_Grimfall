@@ -543,7 +543,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n- |cffffd100Enemy healers|r (on by default): a big heal icon above enemy players who heal others (battlegrounds / arenas) and above healer mobs.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -822,7 +822,84 @@ local function GetOptions()
 											end
 										}
 									}
-								}
+								},
+								EnemyHealers = {
+									name = "Enemy Healers",
+									type = "group",
+									inline = true,
+									order = 3,
+									args = {
+										Info = {
+											type = "description",
+											order = 0,
+											fontSize = "medium",
+											name = "A big heal icon above enemy healers, so you know whom to kill or interrupt first. The game does not tell the role of enemies, so a unit is marked after it healed |cffffd100others 3 times|r (self heals and procs like Vampiric Embrace do not count). Enemy players are marked only in |cffffd100battlegrounds and arenas|r; the list is cleared when you change zone.\n"
+										},
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											get = function()
+												return db.enemyHealers.ON
+											end,
+											set = function(info, val)
+												db.enemyHealers.ON = val
+											end
+										},
+										NPCs = {
+											name = "Also healer NPCs",
+											type = "toggle",
+											order = 2,
+											width = "double",
+											desc = "Mobs that heal other mobs (e.g. in dungeons) get the icon too, everywhere.",
+											descStyle = "inline",
+											disabled = function()
+												return not db.enemyHealers.ON
+											end,
+											get = function()
+												return db.enemyHealers.npcs
+											end,
+											set = function(info, val)
+												db.enemyHealers.npcs = val
+											end
+										},
+										Size = {
+											name = "Icon size",
+											type = "range",
+											order = 3,
+											min = 16,
+											max = 64,
+											step = 1,
+											disabled = function()
+												return not db.enemyHealers.ON
+											end,
+											get = function()
+												return db.enemyHealers.size
+											end,
+											set = function(info, val)
+												db.enemyHealers.size = val
+											end
+										},
+										Height = {
+											name = "Height above the nameplate",
+											type = "range",
+											order = 4,
+											min = 0,
+											max = 150,
+											step = 1,
+											disabled = function()
+												return not db.enemyHealers.ON
+											end,
+											get = function()
+												return db.enemyHealers.y
+											end,
+											set = function(info, val)
+												db.enemyHealers.y = val
+											end
+										}
+									}
+								},
 							}
 						},
 						Friendly = {
@@ -4605,7 +4682,7 @@ local GROUP_HELP = {
 	["NameplateSettings"] = "How the nameplates look: size, colors, texts, icons. These are the normal settings; in combat the |cff89F559Threat System|r can override alpha, scale and colors of mobs that fight you or your group.",
 	["NameplateSettings.GeneralSettings.Hiding"] = "Untick a mob type to hide its nameplates completely.",
 	["NameplateSettings.GeneralSettings.BlizzSettings"] = "The game's own nameplate switches (the same as in the game's Interface options). Friendly ones are under |cff89F559Nameplate Settings -> Friendly|r.",
-	["NameplateSettings.EnemyNameplates"] = "Extra warnings on enemy nameplates.",
+	["NameplateSettings.EnemyNameplates"] = "Extra warnings on enemy nameplates: execute line, castbar highlight for important spells, and a heal icon above enemy healers.",
 	["NameplateSettings.HealthBarTexture.Size"] = "Size of the health bar; the whole nameplate is built around it.",
 	["NameplateSettings.HealthBarTexture.HealthBarGroup"] = "Look of the health bar. |cffffd100Target|r / |cffffd100Mouseover|r: highlight on the nameplate of your target / of the mob under the mouse.",
 	["NameplateSettings.HealthBarTexture.Coloring"] = "Normal health bar colors. Order of priority: raid mark color > threat color (only in combat, |cff89F559Threat System -> Coloring|r) > the colors below.",

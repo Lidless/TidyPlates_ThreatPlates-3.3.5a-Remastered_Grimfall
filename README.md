@@ -92,6 +92,9 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   at the set health %.
 - **Cast highlight** (same place, off by default): the castbar blinks with a red border when an enemy casts a spell
   from your list. Spells interrupted by you or your group are **learned automatically**.
+- **Enemy healers** (same place, on by default): a big heal icon above enemy healers. The client has no role info for
+  enemies, so a unit is marked after it healed others 3 times (self heals and procs like Vampiric Embrace do not count).
+  Enemy players: only in battlegrounds and arenas; healer NPCs: everywhere (can be turned off). Cleared on zone change.
 - **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a
   magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
 - **Nameplate Settings → Friendly**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control

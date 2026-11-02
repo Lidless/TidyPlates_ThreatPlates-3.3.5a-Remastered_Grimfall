@@ -5,6 +5,9 @@
 --                         spells interrupted by you or your group are learned automatically
 --   * Dispellable arrow : blinking up arrow left of the debuff icons when an enemy has
 --                         a magic / enrage buff that can be purged or dispelled
+--   * Enemy healers     : big heal icon above enemy healers. Players: in battlegrounds and
+--                         arenas; NPCs: everywhere. A unit counts as healer after healing
+--                         others 3 times (the client has no role info for enemies).
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -13,6 +16,10 @@ local bit_band = bit.band
 local AFFIL_GROUP = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
 local REACTION_FRIENDLY = COMBATLOG_OBJECT_REACTION_FRIENDLY
 local ARROW_TEXTURE = "Interface\\Buttons\\Arrow-Up-Up"
+local HEALER_TEXTURE = "Interface\\Icons\\Spell_Holy_FlashHeal"
+local REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE
+local TYPE_PLAYER = COMBATLOG_OBJECT_TYPE_PLAYER
+local TYPE_NPC = COMBATLOG_OBJECT_TYPE_NPC
 
 local function DB()
 	return TidyPlatesThreat.db and TidyPlatesThreat.db.profile
@@ -68,6 +75,80 @@ end
 local function HasPurgeable(guid)
 	local set = guid and purgeable[guid]
 	return set and next(set) ~= nil
+end
+
+-------------------------------------------------------------------------------
+-- Enemy healers
+-------------------------------------------------------------------------------
+local HEALS_NEEDED = 3 -- heals on others before a unit counts as healer
+local HEAL_THROTTLE = 1 -- seconds; one AoE heal / proc hitting many targets counts once
+-- heals that also come from damage dealers (procs, passive group heals)
+local NOT_HEALER_SPELLS = {
+	["Vampiric Embrace"] = true,
+	["Judgement of Light"] = true,
+	["Judgement of Wisdom"] = true,
+	["Improved Leader of the Pack"] = true,
+	["Blood Craze"] = true,
+	["Spirit Link"] = true
+}
+local healCount, lastHeal, healers = {}, {}, {} -- name -> count / time / true
+
+local function ShortName(name)
+	return name and (string.match(name, "^([^%-]+)") or name)
+end
+
+local function InPvPInstance()
+	local _, iType = IsInInstance()
+	return iType == "pvp" or iType == "arena"
+end
+
+local function ResetHealers()
+	wipe(healCount)
+	wipe(lastHeal)
+	wipe(healers)
+end
+
+local function OnEnemyHeal(srcGUID, srcName, srcFlags, dstGUID, dstFlags, spellName)
+	local db = DB()
+	local eh = db and db.enemyHealers
+	if not (eh and eh.ON) or not srcName or not srcFlags or srcGUID == dstGUID then
+		return
+	end
+	-- an enemy healing another enemy (its ally)
+	if bit_band(srcFlags, REACTION_HOSTILE) == 0 or not dstFlags or bit_band(dstFlags, REACTION_HOSTILE) == 0 then
+		return
+	end
+	if NOT_HEALER_SPELLS[spellName] then
+		return
+	end
+	if bit_band(srcFlags, TYPE_PLAYER) > 0 then
+		if not InPvPInstance() then
+			return
+		end
+	elseif bit_band(srcFlags, TYPE_NPC) > 0 then
+		if not eh.npcs then
+			return
+		end
+	else
+		return -- pets, guardians, totems
+	end
+	local name = ShortName(srcName)
+	if healers[name] then
+		return
+	end
+	local now = GetTime()
+	if lastHeal[name] and now - lastHeal[name] < HEAL_THROTTLE then
+		return
+	end
+	lastHeal[name] = now
+	healCount[name] = (healCount[name] or 0) + 1
+	if healCount[name] >= HEALS_NEEDED then
+		healers[name] = true
+	end
+end
+
+function TidyPlatesThreat.IsEnemyHealer(name)
+	return name and healers[ShortName(name)] or false
 end
 
 -------------------------------------------------------------------------------
@@ -147,6 +228,19 @@ local function GetDecor(ext)
 	arrow.tex = at
 	arrow:Hide()
 	d.arrow = arrow
+	-- enemy healer icon
+	local heal = CreateFrame("Frame", nil, ext)
+	heal:SetFrameLevel(ext:GetFrameLevel() + 6)
+	local hb = heal:CreateTexture(nil, "BACKGROUND")
+	hb:SetAllPoints(heal)
+	hb:SetTexture(0, 0, 0, 1)
+	local ht = heal:CreateTexture(nil, "OVERLAY")
+	ht:SetPoint("TOPLEFT", heal, "TOPLEFT", 2, -2)
+	ht:SetPoint("BOTTOMRIGHT", heal, "BOTTOMRIGHT", -2, 2)
+	ht:SetTexture(HEALER_TEXTURE)
+	ht:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+	heal:Hide()
+	d.healer = heal
 
 	decor[ext] = d
 	return d
@@ -215,6 +309,19 @@ local function UpdatePlates(elapsed)
 				end
 			end
 
+			-- enemy healer icon
+			local eh = db.enemyHealers
+			if enemy and eh and eh.ON and healers[ShortName(unit.name)] then
+				local size = eh.size or 32
+				d.healer:SetWidth(size)
+				d.healer:SetHeight(size)
+				d.healer:ClearAllPoints()
+				d.healer:SetPoint("CENTER", ext, "CENTER", 0, eh.y or 62)
+				d.healer:Show()
+			else
+				d.healer:Hide()
+			end
+
 			-- dispellable arrow
 			if enemy and pa and pa.ON and HasPurgeable(PlateGUID(unit)) then
 				local dw = ext.widgets and ext.widgets.WidgetDebuff
@@ -243,7 +350,11 @@ end)
 
 driver:SetScript("OnEvent", function(self, event, ...)
 	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-		local _, sub, srcGUID, _, srcFlags, dstGUID, _, dstFlags, _, spellName, _, extra1, extra2, extra3 = ...
+		local _, sub, srcGUID, srcName, srcFlags, dstGUID, _, dstFlags, _, spellName, _, extra1, extra2, extra3 = ...
+		if sub == "SPELL_HEAL" or sub == "SPELL_PERIODIC_HEAL" then
+			OnEnemyHeal(srcGUID, srcName, srcFlags, dstGUID, dstFlags, spellName)
+			return
+		end
 		local dstEnemy = dstFlags and bit_band(dstFlags, REACTION_FRIENDLY) == 0
 		if not dstEnemy then
 			return
@@ -288,6 +399,9 @@ driver:SetScript("OnEvent", function(self, event, ...)
 		ScanUnit("focus")
 	elseif event == "PLAYER_REGEN_ENABLED" then
 		wipe(purgeable)
+	elseif event == "PLAYER_ENTERING_WORLD" then
+		-- new battleground / arena / dungeon: forget the old healers
+		ResetHealers()
 	end
 end)
 driver:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -296,3 +410,4 @@ driver:RegisterEvent("PLAYER_TARGET_CHANGED")
 driver:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 driver:RegisterEvent("PLAYER_FOCUS_CHANGED")
 driver:RegisterEvent("PLAYER_REGEN_ENABLED")
+driver:RegisterEvent("PLAYER_ENTERING_WORLD")

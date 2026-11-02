@@ -165,6 +165,7 @@ function TidyPlatesThreat:OnInitialize()
 			friendlyPlayerMode = "bar", -- "bar" (light blue health bar) or "name" (name only, bar while damaged)
 			executeLine = {ON = false, percent = 20},
 			castHighlight = {ON = false, learn = true, spells = {}},
+			enemyHealers = {ON = true, npcs = true, size = 32, y = 62},
 			purgeArrow = {ON = true},
 			minimap = {
 				hide = false,
