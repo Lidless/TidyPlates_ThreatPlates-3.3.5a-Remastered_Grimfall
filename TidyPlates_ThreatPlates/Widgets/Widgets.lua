@@ -192,20 +192,6 @@ local function OnInitialize(plate)
 		w.TotemIconWidget = nil
 	end
 
-	-- Unique Widget
-	if db.uniqueWidget.ON then
-		if not w.UniqueIconWidget then
-			local widget = ThreatPlatesWidgets.CreateUniqueIconWidget(plate)
-			widget:SetHeight(db.uniqueWidget.scale)
-			widget:SetWidth(db.uniqueWidget.scale)
-			widget:SetFrameLevel(plate:GetFrameLevel() + 1)
-			widget:SetPoint(db.uniqueWidget.anchor, plate, (db.uniqueWidget.x), (db.uniqueWidget.y))
-			w.UniqueIconWidget = widget
-		end
-	elseif w.UniqueIconWidget then
-		w.UniqueIconWidget:Hide()
-		w.UniqueIconWidget = nil
-	end
 
 	-- Target Widget
 	if db.targetWidget.ON then
@@ -356,16 +342,6 @@ local function OnUpdate(plate, unit)
 		w.TotemIconWidget:SetWidth(db.totemWidget.scale)
 		w.TotemIconWidget:SetPoint(db.totemWidget.anchor, plate, (db.totemWidget.x), (db.totemWidget.y))
 		w.TotemIconWidget:Update(unit)
-	end
-	-- Unique Icons
-	if db.uniqueWidget.ON then
-		if not w.UniqueIconWidget then
-			OnInitialize(plate)
-		end
-		w.UniqueIconWidget:SetHeight(db.uniqueWidget.scale)
-		w.UniqueIconWidget:SetWidth(db.uniqueWidget.scale)
-		w.UniqueIconWidget:SetPoint(db.uniqueWidget.anchor, plate, (db.uniqueWidget.x), (db.uniqueWidget.y))
-		w.UniqueIconWidget:Update(unit)
 	end
 	-- Mob Target Widget
 	if db.targetOfWidget and db.targetOfWidget.ON then

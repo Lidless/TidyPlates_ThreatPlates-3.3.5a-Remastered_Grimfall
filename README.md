@@ -108,7 +108,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 - No "set your theme to Threat Plates?" popup: the theme is selected automatically.
 - Options cleaned up: duplicated settings merged, a switch that did nothing (friendly *Click Through*) removed.
   All friendly settings (which friendly nameplates are shown, players, NPCs, group effects) are in one **Friendly** tab,
-  *Totem Nameplates* moved under Nameplate Settings, the *Profiles* tab was replaced by a **Reset all settings** button
+  *Totem Nameplates* moved under Nameplate Settings, *Custom Nameplates* removed (WotLK pet / raid add presets; pets
+  and guardians can be hidden in the Friendly tab or the Blizzard interface options), the *Profiles* tab was replaced by a **Reset all settings** button
   in the Help tab.
 - **About** tab cleaned up (no donate / Discord links, no translator list).
 - All addon texts are English.

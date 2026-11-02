@@ -10,5 +10,4 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="Widgets\ThreatWidget.lua" />
 <Script file="Widgets\TargetOfWidget.lua" />
 <Script file="Widgets\TotemIconWidget.lua" />
-<Script file="Widgets\UniqueIconWidget.lua" />
 </Ui>

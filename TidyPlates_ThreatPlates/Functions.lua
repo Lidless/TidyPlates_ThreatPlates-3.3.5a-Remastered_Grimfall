@@ -58,36 +58,7 @@ do
 		else
 			nonTargetAlpha = 0
 		end
-		if style == "unique" then
-			for k_c, k_v in pairs(db.uniqueSettings.list) do
-				if k_v == unit.name or (custom and k_v == "GROUP") then
-					u = db.uniqueSettings[k_c]
-					if not u.overrideAlpha then
-						return (u.alpha + nonTargetAlpha), db.blizzFade.toggle
-					elseif db.threat.ON and InCombatLockdown() and db.threat.useAlpha and u.overrideAlpha then
-						if unit.isMarked and TidyPlatesThreat.db.profile.threat.marked.alpha then
-							return (db.nameplate.alpha["Marked"] + nonTargetAlpha), db.blizzFade.toggle
-						else
-							if TidyPlatesThreat.db.char.threat.tanking then
-								return (db.threat["tank"].alpha[EffectiveThreat(unit, "tank")] + nonTargetAlpha), db.blizzFade.toggle
-							else
-								return (db.threat["dps"].alpha[EffectiveThreat(unit, "dps")] + nonTargetAlpha), db.blizzFade.toggle
-							end
-						end
-					elseif not InCombatLockdown() and u.overrideAlpha then
-						if (unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.alpha["Boss"] + nonTargetAlpha) or 1), db.blizzFade.toggle
-						elseif (unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.alpha["Elite"] + nonTargetAlpha) or 1), db.blizzFade.toggle
-						elseif (not unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.alpha["Normal"] + nonTargetAlpha) or 1), db.blizzFade.toggle
-						elseif unit.reaction == "NEUTRAL" then
-							return ((db.nameplate.alpha["Neutral"] + nonTargetAlpha) or 1), db.blizzFade.toggle
-						end
-					end
-				end
-			end
-		elseif style == "normal" then
+		if style == "normal" then
 			if T then
 				return (db.nameplate.alpha[T] + nonTargetAlpha), db.blizzFade.toggle
 			else
@@ -126,18 +97,6 @@ do
 				return db.scaleType["Normal"]
 			elseif T == "Normal" or T == "Elite" or T == "Boss" then
 				return db.scaleType[T]
-			elseif T == "Unique" then
-				if custom then
-					return db.scaleType["Normal"]
-				elseif (unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-					return db.scaleType["Boss"]
-				elseif (unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-					return db.scaleType["Elite"]
-				elseif (not unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-					return db.scaleType["Normal"]
-				elseif unit.reaction == "NEUTRAL" then
-					return db.scaleType["Normal"]
-				end
 			end
 		else
 			return 0
@@ -148,37 +107,7 @@ do
 		local db = TidyPlatesThreat.db.profile
 		local T, custom = TidyPlatesThreat.UnitType(unit)
 		local style = TidyPlatesThreat.SetStyle(unit)
-		if style == "unique" then
-			for k_c, k_v in pairs(db.uniqueSettings.list) do
-				if k_v == unit.name or (custom and k_v == "GROUP") then
-					local u = db.uniqueSettings[k_c]
-					if not u.overrideScale then
-						return u.scale
-					elseif db.threat.ON and InCombatLockdown and db.threat.useScale and u.overrideScale then
-						if unit.isMarked and db.threat.marked.scale then
-							return (db.nameplate.scale["Marked"])
-						elseif not custom then
-							if TidyPlatesThreat.db.char.threat.tanking then
-								return (db.threat["tank"].scale[EffectiveThreat(unit, "tank")] + (TypeScale(unit)))
-							else
-								return (db.threat["dps"].scale[EffectiveThreat(unit, "dps")] + (TypeScale(unit)))
-							end
-						end
-					elseif not InCombatLockdown() and u.overrideScale then
-						if (unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.scale["Boss"]) or 1)
-						elseif (unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.scale["Elite"]) or 1)
-						elseif (not unit.isElite and not unit.isDangerous and (unit.reaction == "FRIENDLY" or unit.reaction == "HOSTILE")) then
-							return ((db.nameplate.scale["Normal"]) or 1)
-						elseif unit.reaction == "NEUTRAL" then
-							return ((db.nameplate.scale["Neutral"]) or 1)
-						end
-					else
-					end
-				end
-			end
-		elseif style == "normal" then
+		if style == "normal" then
 			return db.nameplate.scale[(unit.isTarget and "Target" or T)] or 1
 		elseif (style == "tank" or style == "dps") and db.threat.useScale then
 			local targetscale = unit.isTarget and db.nameplate.scale.Target or 0
@@ -302,16 +231,6 @@ do
 		local db = TidyPlatesThreat.db.profile
 		local style, custom = TidyPlatesThreat.SetStyle(unit)
 
-		if custom == true then
-			for k_c, k_v in pairs(db.uniqueSettings.list) do
-				if k_v == "GROUP" then
-					if db.uniqueSettings[k_c].useColor == false and (db.uniqueSettings[k_c].allowMarked == false or not unit.isMarked) then
-						style = TidyPlatesThreat.db.char.threat.tanking and "tank" or "dps"
-					end
-					break
-				end
-			end
-		end
 
 		if style == "totem" or style == "etotem" then
 			if db.settings.raidicon.hpColor and unit.isMarked then
@@ -324,49 +243,6 @@ do
 					return c.r, c.g, c.b
 				else
 					return unit.red, unit.green, unit.blue
-				end
-			end
-		elseif style == "unique" then
-			for k_c, k_v in pairs(db.uniqueSettings.list) do
-				if k_v == unit.name or (custom and k_v == "GROUP") then
-					local u = db.uniqueSettings[k_c]
-					if u.useColor then
-						if u.allowMarked and unit.isMarked and db.settings.raidicon.hpColor then
-							local R = db.settings.raidicon.hpMarked[unit.raidIcon]
-							return R.r, R.g, R.b
-						else
-							local c = u.color
-							return c.r, c.g, c.b
-						end
-					elseif not u.useColor then
-						if u.allowMarked and unit.isMarked and db.settings.raidicon.hpColor then
-							local R = db.settings.raidicon.hpMarked[unit.raidIcon]
-							return R.r, R.g, R.b
-						elseif not unit.isMarked and db.threat.useHPColor and InCombatLockdown() and db.threat.ON then
-							if TidyPlatesThreat.db.char.threat.tanking then
-								if unit.threatValue < 2 then
-									if isTanked(unit) then
-										local S = db.tHPbarColor
-										return S.r, S.b, S.b
-									else
-										local T = db.settings["tank"].threatcolor[EffectiveThreat(unit, "tank")]
-										return T.r, T.g, T.b
-									end
-								else
-									local T = db.settings["tank"].threatcolor[EffectiveThreat(unit, "tank")]
-									return T.r, T.g, T.b
-								end
-							else
-								local T = db.settings["dps"].threatcolor[EffectiveThreat(unit, "dps")]
-								if T.a == 0 then
-									return unit.red, unit.green, unit.blue
-								end
-								return T.r, T.g, T.b
-							end
-						else
-							return unit.red, unit.green, unit.blue
-						end
-					end
 				end
 			end
 		elseif (((style == "tank") or (style == "dps")) and db.threat.useHPColor and InCombatLockdown()) then
