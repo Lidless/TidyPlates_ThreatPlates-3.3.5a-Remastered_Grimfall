@@ -38,6 +38,12 @@ This repository contains **both addons that are needed**:
   turns it on), crowd control icons get a **glow** (and can **blink** when the theme asks), icons are **square** (no stretching) with a thin border, and the broken
   glow texture path was fixed.
 
+- Only **Tidy Plates: Threat Plates** is listed in Interface → AddOns: the *Tidy Plates* panel (theme choice, own
+  minimap icon) and the *Hub: Damage / Tank* panels are no longer listed. Their two useful settings moved into `/tptp`:
+  *Castbars on other enemies too* (Nameplate Settings → Castbar) and the combat automation of enemy / friendly
+  nameplates (Nameplate Settings → General Settings / Friendly). `/tidyplates` opens `/tptp`; `/hubdamage` and
+  `/hubtank` are gone.
+
 Everything else is the original 3.3.5 backport.
 
 ### Threat Plates

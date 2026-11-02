@@ -515,8 +515,8 @@ local function CreateInterfacePanel(panelName, panelTitle, heading, parentTitle)
 
 	----------------
 	-- Return a pointer to the whole thingy
+	-- (Grimfall edition: not listed in Interface -> AddOns, the Hub themes are not used)
 	----------------
-	InterfaceOptions_AddCategory(panel)
 	return panel
 end
 
@@ -530,5 +530,4 @@ Panel = CreateInterfacePanel(
 function ShowTidyPlatesHubDamagePanel()
 	InterfaceOptionsFrame_OpenToCategory(Panel)
 end
-SLASH_HUBDAMAGE1 = "/hubdamage"
-SlashCmdList["HUBDAMAGE"] = ShowTidyPlatesHubDamagePanel
+-- Grimfall edition: no slash command, the Hub themes are not used

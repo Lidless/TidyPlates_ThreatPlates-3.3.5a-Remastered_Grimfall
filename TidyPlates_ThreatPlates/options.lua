@@ -706,7 +706,28 @@ local function GetOptions()
 													set = function()
 														SetCVar("nameplateShowEnemyGuardians", abs(GetCVar("nameplateShowEnemyGuardians") - 1))
 													end
-												}
+												},
+												EnemyAutomation = {
+													name = "Enemy nameplates and combat",
+													type = "select",
+													order = 10,
+													width = "double",
+													desc = "Automatically show or hide enemy nameplates when combat starts and ends.",
+													values = function()
+														local m = TidyPlates.AutomationModes or {}
+														local v = {}
+														if m.none then v[m.none] = "Off (switch them by hand)" end
+														if m.show then v[m.show] = "Show in combat, hide after" end
+														if m.hide then v[m.hide] = "Hide in combat, show after" end
+														return v
+													end,
+													get = function()
+														return TidyPlatesOptions and TidyPlatesOptions.EnemyAutomation
+													end,
+													set = function(info, val)
+														TidyPlatesOptions.EnemyAutomation = val
+													end
+												},
 											}
 										}
 									}
@@ -1004,7 +1025,28 @@ local function GetOptions()
 											set = function()
 												SetCVar("nameplateShowFriendlyGuardians", abs(GetCVar("nameplateShowFriendlyGuardians") - 1))
 											end
-										}
+										},
+										FriendlyAutomation = {
+											name = "Friendly nameplates and combat",
+											type = "select",
+											order = 10,
+											width = "double",
+											desc = "Automatically show or hide friendly nameplates when combat starts and ends.",
+											values = function()
+												local m = TidyPlates.AutomationModes or {}
+												local v = {}
+												if m.none then v[m.none] = "Off (switch them by hand)" end
+												if m.show then v[m.show] = "Show in combat, hide after" end
+												if m.hide then v[m.hide] = "Hide in combat, show after" end
+												return v
+											end,
+											get = function()
+												return TidyPlatesOptions and TidyPlatesOptions.FriendlyAutomation
+											end,
+											set = function(info, val)
+												TidyPlatesOptions.FriendlyAutomation = val
+											end
+										},
 									}
 								},
 								Players = {
@@ -1592,7 +1634,24 @@ local function GetOptions()
 													TidyPlates:StopSpellCastWatcher()
 												end
 											end
-										}
+										},
+										NonTargetCastbars = {
+											name = "Castbars on other enemies too",
+											type = "toggle",
+											order = 10,
+											width = "double",
+											desc = "Also show castbars of enemies that are not your target or mouseover, from the combat log (when possible: the cast has to start while the nameplate is visible). The cast highlight works on these too.",
+											descStyle = "inline",
+											get = function()
+												return TidyPlatesOptions and TidyPlatesOptions.EnableCastWatcher
+											end,
+											set = function(info, val)
+												TidyPlatesOptions.EnableCastWatcher = val
+												if TidyPlates.ApplyAutomationSettings then
+													TidyPlates.ApplyAutomationSettings()
+												end
+											end
+										},
 									}
 								},
 								Textures = {

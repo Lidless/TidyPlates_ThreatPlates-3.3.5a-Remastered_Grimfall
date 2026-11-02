@@ -353,7 +353,8 @@ local function ActivateInterfacePanel()
 		end
 	end)
 
-	InterfaceOptions_AddCategory(panel)
+	-- Grimfall edition: not listed in Interface -> AddOns; the theme is always Threat Plates and
+	-- the useful settings (non-target castbars, combat automation) are in the Threat Plates menu
 end
 
 -- TidyPlatesInterfacePanel = panel -- error: TidyPlatesInterfacePanel
@@ -376,6 +377,14 @@ local function ApplyAutomationSettings()
 
 	TidyPlates:ForceUpdate()
 end
+
+-- used by the Threat Plates menu
+TidyPlates.ApplyAutomationSettings = ApplyAutomationSettings
+TidyPlates.AutomationModes = {
+	none = L["No Automation"],
+	show = L["Show during Combat, Hide when Combat ends"],
+	hide = L["Hide when Combat starts, Show when Combat ends"]
+}
 
 ApplyPanelSettings = function()
 	TidyPlatesOptions.primary = panel.PrimarySpecTheme:GetValue()
@@ -412,7 +421,7 @@ end
 
 local function ShowWelcome()
 	if not TidyPlatesOptions.WelcomeShown then
-		SetCVar("ShowClassColorInNameplate", 1)
+		SetCVar("ShowClassColorInNameplate", 0)
 		SetCVar("nameplateShowEnemies", 1)
 		SetCVar("nameplateShowFriends", 0)
 		SetCVar("threatWarning", 3)
@@ -493,6 +502,8 @@ function panelevents:PLAYER_LOGIN()
 	ActivateInterfacePanel()
 	ShowWelcome()
 	LoadTheme("None")
+	-- Threat Plates has its own minimap button
+	TidyPlatesOptions.EnableMinimapButton = false
 	ApplyAutomationSettings()
 end
 
@@ -511,6 +522,9 @@ function slash_TidyPlates(arg)
 	if type(TidyPlatesSlashCommands[arg]) == "function" then
 		TidyPlatesSlashCommands[arg]()
 		TidyPlates:ForceUpdate()
+	elseif TidyPlatesThreat and TidyPlatesThreat.OpenOptions then
+		-- Grimfall edition: the Threat Plates menu holds all settings
+		TidyPlatesThreat:OpenOptions()
 	else
 		InterfaceOptionsFrame_OpenToCategory(panel)
 	end
