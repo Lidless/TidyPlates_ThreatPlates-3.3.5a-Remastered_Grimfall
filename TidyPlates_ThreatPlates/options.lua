@@ -555,7 +555,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly Targets|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly Players|r: light blue health bar, or name only (the bar appears while the player is damaged)."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly Targets|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly Nameplates|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -583,7 +583,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, class icons, raid target art, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves.\n|cff89F559Profiles|r - save / copy / reset all settings."
+									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, class icons, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight) and Friendly Nameplates (players: bar or name only, color; NPCs: name only).\n|cff89F559Profiles|r - save / copy / reset all settings."
 								}
 							}
 						}
@@ -876,31 +876,67 @@ local function GetOptions()
 							}
 						},
 						FriendlyPlayers = {
-							name = "Friendly Players",
+							name = "Friendly Nameplates",
 							type = "group",
 							order = 14,
 							args = {
-								Mode = {
-									name = "Friendly player nameplates",
-									type = "select",
+								Players = {
+									name = "Friendly players",
+									type = "group",
+									inline = true,
 									order = 1,
-									width = "double",
-									values = {
-										bar = "Light blue health bar",
-										name = "Name only (health bar while damaged)"
-									},
-									get = function()
-										return db.friendlyPlayerMode or "bar"
-									end,
-									set = function(info, val)
-										db.friendlyPlayerMode = val
-										Update()
-									end
+									args = {
+										Mode = {
+											name = "Show as",
+											type = "select",
+											order = 1,
+											width = "double",
+											values = {
+												bar = "Health bar",
+												name = "Name only (health bar while damaged)"
+											},
+											get = function()
+												return db.friendlyPlayerMode or "bar"
+											end,
+											set = function(info, val)
+												db.friendlyPlayerMode = val
+												Update()
+											end
+										},
+										Color = {
+											name = "Color",
+											type = "color",
+											order = 2,
+											desc = "Health bar and name color of friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
+											get = GetColor,
+											set = SetColor,
+											arg = {"fPlayerHPbarColor"}
+										},
+										Note = {
+											type = "description",
+											order = 3,
+											name = "With 'Name only' a friendly player shows just the name; when they take damage the health bar appears until they are back at full health. Class colors are not used: on Grimfall (custom classes, classless realm) they would not mean anything."
+										}
+									}
 								},
-								Note = {
-									type = "description",
+								NPCs = {
+									name = "Friendly NPCs",
+									type = "group",
+									inline = true,
 									order = 2,
-									name = "\nWith 'Name only' a friendly player shows just the name; when they take damage the light blue health bar appears until they are back at full health. Friendly NPCs are not affected. The light blue color can be changed under Healthbar -> Coloring (Friendly Player Color)."
+									args = {
+										NameOnly = {
+											name = "Name only",
+											type = "toggle",
+											order = 1,
+											width = "double",
+											desc = "Friendly NPCs (guards, vendors, quest givers...) show only their name, without a health bar.",
+											descStyle = "inline",
+											get = GetValue,
+											set = SetValue,
+											arg = {"friendlyNameOnly"}
+										}
+									}
 								}
 							}
 						},
@@ -1111,90 +1147,16 @@ local function GetOptions()
 											arg = {"healthColorChange"}
 										},
 										ClassColors = {
-											name = L["Class Coloring"],
+											name = L["Enable Enemy Class colors"],
+											type = "toggle",
+											width = "double",
 											order = 2,
-											type = "group",
-											inline = true,
-											args = {
-												Enemy = {
-													name = L["Enemy Class Colors"],
-													type = "group",
-													inline = true,
-													order = 1,
-													disabled = function()
-														return db.healthColorChange
-													end,
-													args = {
-														Enable = {
-															name = L["Enable Enemy Class colors"],
-															type = "toggle",
-															width = "double",
-															get = GetValue,
-															set = SetValue,
-															order = 1,
-															arg = {"allowClass"}
-														}
-													}
-												},
-												Friendly = {
-													name = L["Friendly Class Colors"],
-													type = "group",
-													inline = true,
-													order = 2,
-													disabled = function()
-														return db.healthColorChange
-													end,
-													args = {
-														FriendlyClass = {
-															name = L["Enable Friendly Class Colors"],
-															type = "toggle",
-															desc = L["Enable the showing of friendly player class color on hp bars."],
-															descStyle = "inline",
-															order = 1,
-															width = "double",
-															get = GetValue,
-															set = SetValue,
-															arg = {"friendlyClass"}
-														},
-														FriendlyCaching = {
-															name = L["Friendly Caching"],
-															type = "toggle",
-															desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
-															descStyle = "inline",
-															order = 2,
-															width = "double",
-															disabled = function()
-																return (not db.friendlyClass or db.healthColorChange)
-															end,
-															get = GetValue,
-															set = SetValue,
-															arg = {"cacheClass"}
-														},
-														FriendlyTextOnly = {
-															name = L["Name Only"],
-															desc = L["Show only names above friendly units."],
-															descStyle = "inline",
-															order = 3,
-															type = "toggle",
-															width = "double",
-															get = GetValue,
-															set = SetValue,
-															arg = {"friendlyNameOnly"}
-														},
-														FriendlyClickThrough = {
-															name = L["Click Through"],
-															order = 4,
-															type = "toggle",
-															width = "double",
-															get = GetValue,
-															set = SetValue,
-															arg = {"friendlyClickThrough"},
-															hidden = function() return not db.friendlyNameOnly end,
-															disabled = function() return not db.friendlyNameOnly end
-														}
-													}
-												}
-											}
+											disabled = function()
+												return db.healthColorChange
+											end,
+											get = GetValue,
+											set = SetValue,
+											arg = {"allowClass"}
 										},
 										CustomColors = {
 											name = L["Custom HP Color"],
@@ -1223,18 +1185,10 @@ local function GetOptions()
 														FriendlyColor = {
 															name = L["Friendly Color"],
 															type = "color",
-															desc = "Friendly NPCs.",
+															desc = "Friendly NPCs (friendly players: Nameplate Settings -> Friendly Nameplates).",
 															get = GetColor,
 															set = SetColor,
 															arg = {"fHPbarColor"}
-														},
-														FriendlyPlayerColor = {
-															name = "Friendly Player Color",
-															type = "color",
-															desc = "Friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
-															get = GetColor,
-															set = SetColor,
-															arg = {"fPlayerHPbarColor"}
 														},
 														NeutralColor = {
 															name = L["Neutral Color"],

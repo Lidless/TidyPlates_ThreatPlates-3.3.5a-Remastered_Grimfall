@@ -106,9 +106,7 @@ function TidyPlatesThreat:OnInitialize()
 			healthColorChange = false,
 			customColor = true,
 			allowClass = true,
-			friendlyClass = false,
 			friendlyNameOnly = false,
-			friendlyClickThrough = false,
 			friendlyClassIcon = true,
 			cacheClass = false,
 			castbarColor = {toggle = true, r = 1, g = 0, b = 0.8549019607843137, a = 1},
@@ -1018,7 +1016,7 @@ function TidyPlatesThreat.UnitType(unit)
 
 	-- a group member with hidden nameplates?
 	if (tContains(DB.uniqueSettings.list, "GROUP") and unit.name and UnitInGroup(unit.name)) then
-		if DB.friendlyNameOnly then
+		if DB.friendlyPlayerMode == "name" then
 			return "Normal", true
 		end
 		for k_c, k_v in pairs(DB.uniqueSettings.list) do
@@ -1073,9 +1071,7 @@ function TidyPlatesThreat.SetStyle(unit)
 	elseif T == "Unique" then
 		for k_c, k_v in pairs(DB.uniqueSettings.list) do
 			if custom and k_v == "GROUP" then
-				if DB.friendlyNameOnly then
-					return "text"
-				elseif DB.uniqueSettings[k_c].showNameplate then
+				if DB.uniqueSettings[k_c].showNameplate then
 					return "unique", true
 				else
 					return "empty", true
@@ -1122,7 +1118,8 @@ function TidyPlatesThreat.SetStyle(unit)
 				return "empty"
 			end
 		elseif unit.reaction == "FRIENDLY" then
-			if DB.friendlyNameOnly then
+			if DB.friendlyNameOnly and unit.type ~= "PLAYER" then
+				-- friendly NPCs: name only
 				return "text"
 			elseif unit.type == "PLAYER" and DB.friendlyPlayerMode == "name" and unit.health and unit.healthmax and unit.health >= unit.healthmax then
 				-- friendly players: name only while at full health, health bar while damaged

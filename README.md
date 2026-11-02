@@ -95,14 +95,17 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
 - **Friendly Targets**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
   icons on group members **blink**.
-- **Friendly Players** (Nameplate Settings): light blue health bar, or **name only** (the bar appears while damaged).
+- **Friendly Nameplates** (Nameplate Settings): friendly players with a light blue health bar or **name only** (the bar
+  appears while damaged), their color; friendly NPCs name only. All friendly settings are in this one place.
 
 #### Other changes
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
-  (color: `/tptp` → Nameplate Settings → health bar colors → *Friendly Player Color*).
+  (color: `/tptp` → Nameplate Settings → Friendly Nameplates). Friendly class colors were removed: with custom
+  classes and the classless realm they would not mean anything.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
 - No "set your theme to Threat Plates?" popup: the theme is selected automatically.
+- Options cleaned up: duplicated settings merged, a switch that did nothing (friendly *Click Through*) removed.
 - **About** tab cleaned up (no donate / Discord links, no translator list).
 - All addon texts are English.
 

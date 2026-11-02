@@ -389,30 +389,14 @@ do
 				if db.healthColorChange then
 					local pct = unit.health / unit.healthmax
 					return (1 - pct), (0 + pct), 0
+				elseif unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
+					-- friendly players: one color (light blue by default); class colors mean nothing on Grimfall
+					local c = db.fPlayerHPbarColor
+					return c.r, c.g, c.b
 				elseif db.customColor then
 					if unit.reaction == "FRIENDLY" then
-						-- friendly players and friendly NPCs get different colors
-						local fc = (unit.type == "PLAYER" and db.fPlayerHPbarColor) or db.fHPbarColor
-						if db.friendlyClass then
-							if TidyPlatesThreat.db.profile.cache[unit.name] then
-								local class = TidyPlatesThreat.db.profile.cache[unit.name]
-								local c = ClassColor(class, fc)
-								return c.r, c.g, c.b
-							elseif unit.guid and GetPlayerInfoByGUID(unit.guid) and not TidyPlatesThreat.db.profile.cache[unit.name] then
-								local _, class = GetPlayerInfoByGUID(unit.guid)
-								local c = ClassColor(class, fc)
-								if db.cacheClass then
-									TidyPlatesThreat.db.profile.cache[unit.name] = class
-								end
-								return c.r, c.g, c.b
-							else
-								local d = fc
-								return d.r, d.g, d.b
-							end
-						else
-							local d = fc
-							return d.r, d.g, d.b
-						end
+						local d = db.fHPbarColor
+						return d.r, d.g, d.b
 					elseif unit.reaction == "NEUTRAL" then
 						local n = db.nHPbarColor
 						return n.r, n.g, n.b
@@ -434,20 +418,6 @@ do
 					else
 						return unit.red, unit.green, unit.blue
 					end
-				elseif TidyPlatesThreat.db.profile.cache[unit.name] and db.friendlyClass then
-					local class = TidyPlatesThreat.db.profile.cache[unit.name]
-					local c = ClassColor(class, db.fHPbarColor)
-					return c.r, c.g, c.b
-				elseif
-					unit.guid and GetPlayerInfoByGUID(unit.guid) and not TidyPlatesThreat.db.profile.cache[unit.name] and
-						db.friendlyClass
-				 then
-					local _, class = GetPlayerInfoByGUID(unit.guid)
-					local c = ClassColor(class, db.fHPbarColor)
-					if db.cacheClass then
-						TidyPlatesThreat.db.profile.cache[unit.name] = class
-					end
-					return c.r, c.g, c.b
 				else
 					return unit.red, unit.green, unit.blue
 				end
@@ -483,45 +453,18 @@ end
 --
 
 do
-	local IsInGroup = TidyPlatesUtility.IsInGroup
-	local UnitIterator = TidyPlatesUtility.UnitIterator
-
 	local function SetNameColor(unit)
 		local db = TidyPlatesThreat.db.profile
 		local color = db.settings.name.color
 		local r, g, b = color.r, color.g, color.b
 
-		if unit and unit.reaction == "FRIENDLY" and db.friendlyNameOnly then
+		-- friendly units shown as name only: players in their color, NPCs green
+		if unit and unit.reaction == "FRIENDLY" and TidyPlatesThreat.SetStyle(unit) == "text" then
 			if unit.type == "PLAYER" then
-				if db.cache[unit.name] then
-					local class = db.cache[unit.name]
-					local c = ClassColor(class, color)
-					r, g, b = c.r, c.g, c.b
-				elseif unit.guid and GetPlayerInfoByGUID(unit.guid) and not db.cache[unit.name] then
-					local _, class = GetPlayerInfoByGUID(unit.guid)
-					local c = ClassColor(class, color)
-					if db.cacheClass then
-						db.cache[unit.name] = class
-					end
-					r, g, b = c.r, c.g, c.b
-				elseif IsInGroup() then
-					for uId in UnitIterator() do
-						if UnitName(uId) == unit.name then
-							local class
-							_, class = UnitClass(uId)
-							local c = ClassColor(class, color)
-							if db.cacheClass then
-								db.cache[unit.name] = class
-							end
-							r, g, b = c.r, c.g, c.b
-							break
-						end
-					end
-				end
-			elseif unit.type == "NPC" then
-				r, g, b = 0.2, 0.6, 0.1
+				local c = db.fPlayerHPbarColor
+				r, g, b = c.r, c.g, c.b
 			else
-				r, g, b = db.fHPbarColor.r, db.fHPbarColor.g, db.fHPbarColor.b
+				r, g, b = 0.2, 0.6, 0.1
 			end
 		end
 		return r, g, b

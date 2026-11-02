@@ -48,7 +48,7 @@ local function UpdateClassIconWidget(frame, unit)
 
 	-- hack to move friendly class icons above names.
 	if frame:IsShown() and unit.reaction == "FRIENDLY" and unit.type == "PLAYER" then
-		if db.friendlyNameOnly then
+		if TidyPlatesThreat.SetStyle(unit) == "text" then
 			if not frame.moved then
 				frame:ClearAllPoints()
 				frame:SetPoint("BOTTOM", frame:GetParent(), "BOTTOM", 0, 20)
