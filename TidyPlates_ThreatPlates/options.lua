@@ -543,7 +543,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n- |cffffd100Enemy healers|r (on by default): a big heal icon above enemy players who heal others (battlegrounds / arenas) and above healer mobs.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n- |cffffd100Quest mobs|r (on by default): a yellow ! with your progress on mobs you still need for a quest.\n- |cffffd100Enemy healers|r (on by default): a big heal icon above enemy players who heal others (battlegrounds / arenas) and above healer mobs.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -896,6 +896,59 @@ local function GetOptions()
 											end,
 											set = function(info, val)
 												db.enemyHealers.y = val
+											end
+										}
+									}
+								},
+								QuestMobs = {
+									name = "Quest Mobs",
+									type = "group",
+									inline = true,
+									order = 4,
+									args = {
+										Info = {
+											type = "description",
+											order = 0,
+											fontSize = "medium",
+											name = "A yellow |cffffd100!|r with your progress (e.g. 3/10) left of the health bar of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it. Only your own quests (the game does not tell your group's quests).\n"
+										},
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											get = function()
+												return db.questMobs.ON
+											end,
+											set = function(info, val)
+												db.questMobs.ON = val
+											end
+										},
+										Progress = {
+											name = "Show progress (3/10)",
+											type = "toggle",
+											order = 2,
+											width = "double",
+											disabled = function()
+												return not db.questMobs.ON
+											end,
+											get = function()
+												return db.questMobs.progress
+											end,
+											set = function(info, val)
+												db.questMobs.progress = val
+											end
+										},
+										Forget = {
+											name = "Forget learned quest mobs",
+											type = "execute",
+											order = 3,
+											width = "double",
+											desc = "Clears the list of mobs learned from tooltips and loot (e.g. after a wrong match). Kill objectives are not affected.",
+											confirm = true,
+											confirmText = "Forget all learned quest mobs?",
+											func = function()
+												TidyPlatesThreat.ForgetQuestMobs()
 											end
 										}
 									}
@@ -4682,7 +4735,7 @@ local GROUP_HELP = {
 	["NameplateSettings"] = "How the nameplates look: size, colors, texts, icons. These are the normal settings; in combat the |cff89F559Threat System|r can override alpha, scale and colors of mobs that fight you or your group.",
 	["NameplateSettings.GeneralSettings.Hiding"] = "Untick a mob type to hide its nameplates completely.",
 	["NameplateSettings.GeneralSettings.BlizzSettings"] = "The game's own nameplate switches (the same as in the game's Interface options). Friendly ones are under |cff89F559Nameplate Settings -> Friendly|r.",
-	["NameplateSettings.EnemyNameplates"] = "Extra warnings on enemy nameplates: execute line, castbar highlight for important spells, and a heal icon above enemy healers.",
+	["NameplateSettings.EnemyNameplates"] = "Extra warnings on enemy nameplates: execute line, castbar highlight for important spells, a heal icon above enemy healers and quest marks on mobs you need.",
 	["NameplateSettings.HealthBarTexture.Size"] = "Size of the health bar; the whole nameplate is built around it.",
 	["NameplateSettings.HealthBarTexture.HealthBarGroup"] = "Look of the health bar. |cffffd100Target|r / |cffffd100Mouseover|r: highlight on the nameplate of your target / of the mob under the mouse.",
 	["NameplateSettings.HealthBarTexture.Coloring"] = "Normal health bar colors. Order of priority: raid mark color > threat color (only in combat, |cff89F559Threat System -> Coloring|r) > the colors below.",

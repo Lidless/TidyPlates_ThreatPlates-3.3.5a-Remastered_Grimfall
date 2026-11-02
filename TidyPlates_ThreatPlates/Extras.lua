@@ -8,6 +8,9 @@
 --   * Enemy healers     : big heal icon above enemy healers. Players: in battlegrounds and
 --                         arenas; NPCs: everywhere. A unit counts as healer after healing
 --                         others 3 times (the client has no role info for enemies).
+--   * Quest mobs        : yellow "!" with the progress (3/10) on mobs you still need for a
+--                         quest: kill objectives from the quest log, item drop mobs learned
+--                         from tooltips (any line naming an objective / quest) and from loot.
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -152,6 +155,175 @@ function TidyPlatesThreat.IsEnemyHealer(name)
 end
 
 -------------------------------------------------------------------------------
+-- Quest mobs
+-------------------------------------------------------------------------------
+local QUEST_TEXTURE = "Interface\\GossipFrame\\AvailableQuestIcon"
+local MIN_MATCH_LEN = 4 -- objective / quest names shorter than this are not matched in tooltips
+local questObjectives = {} -- list of objectives {quest, name, cur, max, done, kind, key}
+local objectiveByKey = {}  -- "quest|objective" -> objective
+local killTargets = {}     -- lower case mob name -> objective (kill objectives)
+local questDirty, lastQuestBuild = true, 0
+
+local function Lower(str)
+	return str and string.lower(str)
+end
+
+local function LearnedQuestMobs()
+	local g = TidyPlatesThreat.db and TidyPlatesThreat.db.global
+	if not g then
+		return {}
+	end
+	g.questMobs = g.questMobs or {}
+	return g.questMobs
+end
+
+local function RebuildQuests()
+	wipe(questObjectives)
+	wipe(objectiveByKey)
+	wipe(killTargets)
+	for i = 1, (GetNumQuestLogEntries() or 0) do
+		local title, _, _, _, isHeader = GetQuestLogTitle(i)
+		if title and not isHeader then
+			for j = 1, (GetNumQuestLeaderBoards(i) or 0) do
+				local text, kind, finished = GetQuestLogLeaderBoard(j, i)
+				local name, cur, max = string.match(text or "", "^(.-):%s*(%d+)%s*/%s*(%d+)")
+				if name then
+					if kind == "monster" then
+						name = string.gsub(name, "%s+slain$", "")
+					end
+					cur, max = tonumber(cur), tonumber(max)
+					local obj = {quest = title, name = name, cur = cur, max = max, kind = kind}
+					obj.done = finished and true or (cur >= max)
+					obj.key = title .. "|" .. name
+					objectiveByKey[obj.key] = obj
+					table.insert(questObjectives, obj)
+					if kind == "monster" and not obj.done then
+						killTargets[Lower(name)] = obj
+					end
+				end
+			end
+		end
+	end
+	questDirty = false
+	lastQuestBuild = GetTime()
+end
+
+local function UpdateQuestsIfNeeded()
+	if questDirty and GetTime() - lastQuestBuild > 0.5 then
+		RebuildQuests()
+	end
+end
+
+local function LearnQuestMob(mob, obj)
+	local l = Lower(mob)
+	local learned = LearnedQuestMobs()
+	learned[l] = learned[l] or {}
+	learned[l][obj.key] = true
+end
+
+-- the objective a mob is (still) needed for, or nil
+local function QuestFor(mob)
+	local l = Lower(mob)
+	if not l then
+		return
+	end
+	local obj = killTargets[l]
+	if obj then
+		return obj
+	end
+	local keys = LearnedQuestMobs()[l]
+	if keys then
+		for key in pairs(keys) do
+			obj = objectiveByKey[key]
+			if obj and not obj.done then
+				return obj
+			end
+		end
+	end
+end
+
+-- tooltip of a mob: any line naming an open objective or quest -> remember the mob
+local function ScanTooltip()
+	local db = DB()
+	if not (db and db.questMobs and db.questMobs.ON) then
+		return
+	end
+	local _, uid = GameTooltip:GetUnit()
+	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) then
+		return
+	end
+	local mob = UnitName(uid)
+	if not mob then
+		return
+	end
+	if questDirty then
+		RebuildQuests()
+	end
+	for i = 2, GameTooltip:NumLines() do
+		local fs = _G["GameTooltipTextLeft" .. i]
+		local text = fs and Lower(fs:GetText())
+		if text and text ~= "" then
+			for _, obj in ipairs(questObjectives) do
+				if not obj.done then
+					local on, oq = Lower(obj.name), Lower(obj.quest)
+					if (#on >= MIN_MATCH_LEN and string.find(text, on, 1, true)) or (#oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true)) then
+						LearnQuestMob(mob, obj)
+					end
+				end
+			end
+		end
+	end
+end
+
+-- other addons may add their lines to the tooltip right after us: scan on the next frame
+local tooltipScanner = CreateFrame("Frame")
+tooltipScanner:Hide()
+tooltipScanner:SetScript("OnUpdate", function(self)
+	self:Hide()
+	if GameTooltip:IsShown() then
+		ScanTooltip()
+	end
+end)
+GameTooltip:HookScript("OnTooltipSetUnit", function()
+	tooltipScanner:Show()
+end)
+
+-- looting a quest item from a corpse -> remember the mob
+local function ScanLoot()
+	local db = DB()
+	if not (db and db.questMobs and db.questMobs.ON) then
+		return
+	end
+	local mob
+	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
+		mob = UnitName("mouseover")
+	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") then
+		mob = UnitName("target")
+	end
+	if not mob then
+		return
+	end
+	if questDirty then
+		RebuildQuests()
+	end
+	for slot = 1, (GetNumLootItems() or 0) do
+		local _, itemName = GetLootSlotInfo(slot)
+		local l = Lower(itemName)
+		if l then
+			for _, obj in ipairs(questObjectives) do
+				if obj.kind == "item" and Lower(obj.name) == l then
+					LearnQuestMob(mob, obj)
+				end
+			end
+		end
+	end
+end
+
+function TidyPlatesThreat.ForgetQuestMobs()
+	wipe(LearnedQuestMobs())
+end
+
+-------------------------------------------------------------------------------
 -- Cast highlight list
 -------------------------------------------------------------------------------
 local function HighlightList()
@@ -241,6 +413,26 @@ local function GetDecor(ext)
 	ht:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	heal:Hide()
 	d.healer = heal
+	-- quest mark: yellow "!" left of the health bar, progress text left of it
+	local quest = CreateFrame("Frame", nil, ext)
+	quest:SetWidth(16)
+	quest:SetHeight(16)
+	quest:SetFrameLevel(ext:GetFrameLevel() + 6)
+	local qt = quest:CreateTexture(nil, "OVERLAY")
+	qt:SetAllPoints(quest)
+	qt:SetTexture(QUEST_TEXTURE)
+	local qs = quest:CreateFontString(nil, "OVERLAY")
+	qs:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	qs:SetTextColor(1, 0.82, 0)
+	qs:SetPoint("RIGHT", quest, "LEFT", 0, 0)
+	quest.text = qs
+	if bars and bars.healthbar then
+		quest:SetPoint("RIGHT", bars.healthbar, "LEFT", -2, 0)
+	else
+		quest:SetPoint("BOTTOM", ext, "TOP", 0, 0)
+	end
+	quest:Hide()
+	d.quest = quest
 
 	decor[ext] = d
 	return d
@@ -274,6 +466,7 @@ local function UpdatePlates(elapsed)
 		return
 	end
 	local exe, hl, pa = db.executeLine, db.castHighlight, db.purgeArrow
+	UpdateQuestsIfNeeded()
 	local pulse = Pulse(clock)
 	local list = hl and hl.spells
 
@@ -320,6 +513,20 @@ local function UpdatePlates(elapsed)
 				d.healer:Show()
 			else
 				d.healer:Hide()
+			end
+
+			-- quest mark
+			local qm = db.questMobs
+			local obj = enemy and qm and qm.ON and QuestFor(unit.name)
+			if obj then
+				if qm.progress and obj.max and obj.max > 1 then
+					d.quest.text:SetText(obj.cur .. "/" .. obj.max)
+				else
+					d.quest.text:SetText("")
+				end
+				d.quest:Show()
+			else
+				d.quest:Hide()
 			end
 
 			-- dispellable arrow
@@ -402,6 +609,11 @@ driver:SetScript("OnEvent", function(self, event, ...)
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		-- new battleground / arena / dungeon: forget the old healers
 		ResetHealers()
+		questDirty = true
+	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" then
+		questDirty = true
+	elseif event == "LOOT_OPENED" then
+		ScanLoot()
 	end
 end)
 driver:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -411,3 +623,6 @@ driver:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 driver:RegisterEvent("PLAYER_FOCUS_CHANGED")
 driver:RegisterEvent("PLAYER_REGEN_ENABLED")
 driver:RegisterEvent("PLAYER_ENTERING_WORLD")
+driver:RegisterEvent("QUEST_LOG_UPDATE")
+driver:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+driver:RegisterEvent("LOOT_OPENED")
