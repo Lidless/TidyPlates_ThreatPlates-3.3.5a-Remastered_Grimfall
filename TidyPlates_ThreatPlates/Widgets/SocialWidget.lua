@@ -1,31 +1,15 @@
+-- Friends & Guild icon: small icon on the nameplates of your friends and guild members
 local f = CreateFrame("frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:RegisterEvent("FRIENDLIST_UPDATE")
 f:RegisterEvent("GUILD_ROSTER_UPDATE")
-f:RegisterEvent("BN_CONNECTED")
-f:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-f:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-f:RegisterEvent("BN_FRIEND_LIST_SIZE_CHANGED")
 
 --local
 local weaktable = TidyPlatesUtility.weaktable
 local ListTable = {}
 ListTable.g = setmetatable({}, weaktable)
-ListTable.b = setmetatable({}, weaktable)
 ListTable.f = setmetatable({}, weaktable)
 local eventsRegistered = true
-
-local function UpdateBnetList()
-	wipe(ListTable.b)
-	local BnetTotal, BnetOnline = BNGetNumFriends()
-	for i = 1, BnetOnline do
-		local _, _, _, _, toonID, client, isOnline, _, _, _, _, _, _, _ = BNGetFriendInfo(i)
-		if isOnline and toonID and client == "WoW" then
-			local _, name, _, _, _, _, _, _, _, _ = BNGetToonInfo(toonID)
-			tinsert(ListTable.b, name)
-		end
-	end
-end
 
 local function EventHandler(self, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
@@ -33,7 +17,6 @@ local function EventHandler(self, event, ...)
 		if IsInGuild() then
 			GuildRoster()
 		end
-		UpdateBnetList()
 	elseif event == "GUILD_ROSTER_UPDATE" then
 		wipe(ListTable.g)
 		for i = 1, GetNumGuildMembers() do
@@ -47,8 +30,6 @@ local function EventHandler(self, event, ...)
 			local name = select(1, GetFriendInfo(i))
 			tinsert(ListTable.f, name)
 		end
-	elseif event == "BN_FRIEND_LIST_SIZE_CHANGED" or event == "BN_CONNECTED" or event == "BN_FRIEND_ACCOUNT_ONLINE" or event == "BN_FRIEND_ACCOUNT_OFFLINE" then
-		UpdateBnetList()
 	end
 end
 
@@ -61,9 +42,6 @@ local function UpdateSocialWidget(frame, unit)
 	if db.ON then
 		if tContains(ListTable.f, unit.name) then
 			frame.Icon:SetTexture(path .. "friendicon")
-			frame:Show()
-		elseif tContains(ListTable.b, unit.name) then
-			frame.Icon:SetTexture("Interface\\FriendsFrame\\PlusManz-BattleNet")
 			frame:Show()
 		elseif tContains(ListTable.g, unit.name) then
 			frame.Icon:SetTexture(path .. "guildicon")

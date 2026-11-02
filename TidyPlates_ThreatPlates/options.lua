@@ -3928,7 +3928,7 @@ local function GetOptions()
 							}
 						},
 						SocialWidget = {
-							name = L["Social Widget"],
+							name = "Friends & Guild Icon",
 							type = "group",
 							order = 30,
 							set = SetValue,
@@ -3943,7 +3943,7 @@ local function GetOptions()
 										Toggle = {
 											name = L["Enable"],
 											type = "toggle",
-											desc = L["Enables the showing if indicator icons for friends, guildmates, and BNET Friends"],
+											desc = "A small icon on the nameplates of players on your friends list (friend icon) or in your guild (guild icon). Only on friendly players, so friendly nameplates must be shown (Shift+V).",
 											descStyle = "inline",
 											width = "double",
 											order = 1,
@@ -4640,7 +4640,7 @@ local GROUP_HELP = {
 	["Widgets"] = "Extra icons and texts on the nameplates.",
 	["Widgets.ComboPointWidget"] = "Your combo points on your target's nameplate.",
 	["Widgets.DebuffWidget.Filtering"] = "|cffffd100Mode|r: which debuffs are shown. |cffffd100All Debuffs|r = everything; |cffffd100(Mine)|r = only the ones you cast; |cffffd100White List|r = only the debuffs in your list; |cffffd100Black List|r = all except the ones in your list; |cffffd100By Prefix|r = each list line says All / My / No.",
-	["Widgets.SocialWidget"] = "Small icon on the nameplates of your friends and guild members.",
+	["Widgets.SocialWidget"] = "Spot your friends and guild members in a crowd (cities, battlegrounds): their nameplate gets a small friend or guild icon. |cffffd100Scale|r = icon size, |cffffd100Placement|r = where the icon sits next to the nameplate.",
 	["Widgets.TargetArtWidget"] = "Extra highlight (arrows, frame...) around your current target's nameplate.",
 }
 

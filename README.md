@@ -103,6 +103,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
   (color: `/tptp` → Nameplate Settings → Friendly). Friendly class colors were removed: with custom
   classes and the classless realm they would not mean anything.
+- **Friends & Guild Icon** widget (formerly *Social Widget*): clearer texts, the Battle.net part removed (no Battle.net on
+  Grimfall).
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - Short **help texts** at the top of the option groups and next to settings whose purpose is not obvious (e.g. the
   Threat System settings only override the Nameplate Settings in combat).
