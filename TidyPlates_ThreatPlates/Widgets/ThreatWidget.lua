@@ -25,7 +25,7 @@ local function UpdateThreatWidget(frame, unit)
 			threatLevel = "MEDIUM" -- your threat is getting high
 		end
 	end
-	if threatLevel and ((style == "dps") or (style == "tank")) and InCombatLockdown() and unit.class == "UNKNOWN" and db.threat.art.ON then
+	if threatLevel and ((style == "dps") or (style == "tank")) and InCombatLockdown() and unit.type == "NPC" and db.threat.art.ON then
 		if unit.isMarked and db.threat.marked.art then
 			frame:Hide()
 		else

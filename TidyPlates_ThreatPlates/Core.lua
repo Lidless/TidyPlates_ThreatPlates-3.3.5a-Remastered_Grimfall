@@ -547,7 +547,7 @@ function TidyPlatesThreat.SetStyle(unit)
 	elseif T then
 		if unit.reaction == "HOSTILE" or unit.reaction == "NEUTRAL" then
 			if DB.nameplate.toggle[T] then
-				if DB.threat.toggle[T] and DB.threat.ON and unit.class == "UNKNOWN" and InCombatLockdown() then
+				if DB.threat.toggle[T] and DB.threat.ON and unit.type == "NPC" and InCombatLockdown() then
 					if DB.threat.nonCombat then
 						-- In combat with us: red name (not reliable on every server), damaged, or we have
 						-- threat on it (a DoT as opener leaves full health and no red name for a while)
@@ -667,8 +667,10 @@ local function EventHandler(self, event, ...)
 		else
 			DB.nameplate.toggle["Totem"] = false
 		end
-		-- no class colors on Grimfall (custom classes, classless realm)
-		SetCVar("ShowClassColorInNameplate", 0)
+		-- The game's class colored enemy bars are how Tidy Plates tells enemy players from mobs
+		-- (a mob's bar is plain red). They are never shown: Threat Plates paints every health bar
+		-- with its own colors (one enemy color, friendly player color...).
+		SetCVar("ShowClassColorInNameplate", 1)
 
 		if CharDB.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) and DB.verbose then
 			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. "FFFFFF" .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())

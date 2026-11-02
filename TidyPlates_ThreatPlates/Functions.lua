@@ -277,7 +277,7 @@ do
 						local c = db.HPbarColor
 						return c.r, c.g, c.b
 					end
-				elseif unit.class and (unit.class ~= "UNKNOWN") and unit.reaction == "HOSTILE" then
+				elseif unit.type == "PLAYER" and unit.reaction == "HOSTILE" then
 					-- enemy players: plain red, no class colors
 					return 1, 0, 0
 				else

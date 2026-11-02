@@ -421,7 +421,7 @@ end
 
 local function ShowWelcome()
 	if not TidyPlatesOptions.WelcomeShown then
-		SetCVar("ShowClassColorInNameplate", 0)
+		SetCVar("ShowClassColorInNameplate", 1) -- needed to tell enemy players from mobs (never shown)
 		SetCVar("nameplateShowEnemies", 1)
 		SetCVar("nameplateShowFriends", 0)
 		SetCVar("threatWarning", 3)
