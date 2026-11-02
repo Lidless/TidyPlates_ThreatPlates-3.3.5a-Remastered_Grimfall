@@ -2,31 +2,6 @@ TidyPlatesThreat = LibStub("AceAddon-3.0"):NewAddon("TidyPlatesThreat", "AceCons
 local L = LibStub("AceLocale-3.0"):GetLocale("TidyPlatesThreat", false)
 local DB
 
-local PlayerClass = select(2, UnitClass("player"))
-local HEX_CLASS_COLOR = {
-	SHAMAN = "2459FF",
-	MAGE = "69CCF0",
-	WARLOCK = "9482C9",
-	HUNTER = "ABD473",
-	ROGUE = "FFF569",
-	PRIEST = "FFFFFF",
-	DRUID = "FF7D0A",
-	DEATHKNIGHT = "C41F3B",
-	WARRIOR = "C79C6E",
-	PALADIN = "F58CBA"
-}
--- Custom-class safe class color (Grimfall CoA has non-standard class tokens)
-local function ClassHex(class)
-	class = class or PlayerClass
-	if class and HEX_CLASS_COLOR[class] then
-		return HEX_CLASS_COLOR[class]
-	end
-	local c = class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-	if c and c.r and c.g and c.b then
-		return string.format("%02X%02X%02X", math.floor(c.r * 255 + 0.5), math.floor(c.g * 255 + 0.5), math.floor(c.b * 255 + 0.5))
-	end
-	return "FFFFFF"
-end
 --
 
 TidyPlatesThemeList = TidyPlatesThemeList or {}
@@ -104,7 +79,6 @@ function TidyPlatesThreat:OnInitialize()
 			blizzFade = {toggle = true, amount = -0.3},
 			healthColorChange = false,
 			customColor = true,
-			allowClass = true,
 			friendlyNameOnly = false,
 			castbarColor = {toggle = true, r = 1, g = 0, b = 0.8549019607843137, a = 1},
 			castbarColorShield = {toggle = true, r = 0.1019607843137255, g = 0.09803921568627451, b = 0.7294117647058823, a = 1},
@@ -696,10 +670,11 @@ local function EventHandler(self, event, ...)
 		else
 			DB.nameplate.toggle["Totem"] = false
 		end
-		SetCVar("ShowClassColorInNameplate", 1)
+		-- no class colors on Grimfall (custom classes, classless realm)
+		SetCVar("ShowClassColorInNameplate", 0)
 
 		if CharDB.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) and DB.verbose then
-			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. ClassHex() .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())
+			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. "FFFFFF" .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())
 		end
 
 	elseif event == "PLAYER_ENTERING_WORLD" then

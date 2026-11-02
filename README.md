@@ -45,7 +45,7 @@ Everything else is the original 3.3.5 backport.
 #### Works with custom classes
 The original addon only knew the 10 Blizzard classes and threw Lua errors (e.g. `Core.lua:1182: attempt to
 concatenate field '?'`) on CoA custom classes. All class lookups are now safe for unknown class tokens, and the class
-based extras (friendly class colors, class icon widget) were removed: with 21 classes and the classless realm they
+based extras (friendly and enemy class colors, class icon widget) were removed; enemies use one enemy color: with 21 classes and the classless realm they
 do not help.
 
 #### Class independent role

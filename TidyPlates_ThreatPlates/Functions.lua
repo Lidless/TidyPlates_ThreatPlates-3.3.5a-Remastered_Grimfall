@@ -1,17 +1,6 @@
 local TidyPlatesThreat = TidyPlatesThreat
 local _
 
--- Custom-class safe class color lookup (Grimfall CoA has non-standard class tokens).
--- Returns the class color, or the given fallback color when the class is unknown.
-local DEFAULT_CLASS_COLOR = {r = 1, g = 1, b = 1}
-local function ClassColor(class, fallback)
-	local c = class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
-	if c and c.r and c.g and c.b then
-		return c
-	end
-	return fallback or DEFAULT_CLASS_COLOR
-end
-
 -- Threat situation used for warnings.
 -- As tank, a mob that is on another known tank (off-tank) is not a warning.
 local RANK = {LOW = 1, MEDIUM = 2, HIGH = 3}
@@ -284,23 +273,13 @@ do
 						local n = db.nHPbarColor
 						return n.r, n.g, n.b
 					else
+						-- enemies (mobs and players alike): one color, no class colors
 						local c = db.HPbarColor
-						if unit.class and (unit.class == "UNKNOWN") then
-							if not db.allowClass then
-								return c.r, c.g, c.b
-							else
-								return unit.red, unit.green, unit.blue
-							end
-						else
-							return unit.red, unit.green, unit.blue
-						end
+						return c.r, c.g, c.b
 					end
-				elseif unit.class and (unit.class ~= "UNKNOWN") then
-					if not db.allowClass then
-						return 1, 0, 0
-					else
-						return unit.red, unit.green, unit.blue
-					end
+				elseif unit.class and (unit.class ~= "UNKNOWN") and unit.reaction == "HOSTILE" then
+					-- enemy players: plain red, no class colors
+					return 1, 0, 0
 				else
 					return unit.red, unit.green, unit.blue
 				end

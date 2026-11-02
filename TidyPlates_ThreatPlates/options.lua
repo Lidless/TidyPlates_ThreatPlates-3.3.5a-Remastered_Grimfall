@@ -1231,18 +1231,6 @@ local function GetOptions()
 											set = SetValue,
 											arg = {"healthColorChange"}
 										},
-										ClassColors = {
-											name = L["Enable Enemy Class colors"],
-											type = "toggle",
-											width = "double",
-											order = 2,
-											disabled = function()
-												return db.healthColorChange
-											end,
-											get = GetValue,
-											set = SetValue,
-											arg = {"allowClass"}
-										},
 										CustomColors = {
 											name = L["Custom HP Color"],
 											order = 3,
