@@ -3874,8 +3874,34 @@ local function GetOptions()
 											descStyle = "inline",
 											arg = {"debuffWidget", "showCC"}
 										},
+										ListHelp = {
+											type = "description",
+											order = 1.9,
+											fontSize = "medium",
+											name = function()
+												local mode = db.debuffWidget.mode
+												if mode == "all" or mode == "allMine" then
+													return "\nIn this mode no debuff list is needed. To pick debuffs by name, choose a |cffffd100White List|r, |cffffd100Black List|r or |cffffd100By Prefix|r mode above; the list box then appears here."
+												end
+												return "\nType one spell name per line (exact name, e.g. |cffffd100Corruption|r), then click |cffffd100Accept|r."
+											end
+										},
 										DebuffList = {
-											name = L["Filtered Debuffs"],
+											name = function()
+												local mode = db.debuffWidget.mode
+												if mode == "whitelist" then
+													return "White list: show ONLY these debuffs (from anyone)"
+												elseif mode == "whitelistMine" then
+													return "White list: show only these debuffs, if you cast them"
+												elseif mode == "blacklist" then
+													return "Black list: show every debuff EXCEPT these"
+												elseif mode == "blacklistMine" then
+													return "Black list: show your debuffs EXCEPT these"
+												elseif mode == "prefix" then
+													return "Prefix list: 'All Name' = from anyone, 'My Name' = only yours, 'No Name' = never"
+												end
+												return "Debuff list"
+											end,
 											type = "input",
 											order = 2,
 											dialogControl = "MultiLineEditBox",
@@ -3893,7 +3919,7 @@ local function GetOptions()
 													db.debuffWidget.filter = tbl
 												end
 											end,
-											disabled = function()
+											hidden = function()
 												return (db.debuffWidget.mode == "all" or db.debuffWidget.mode == "allMine")
 											end
 										}
@@ -4613,7 +4639,7 @@ local GROUP_HELP = {
 	-- Widgets
 	["Widgets"] = "Extra icons and texts on the nameplates.",
 	["Widgets.ComboPointWidget"] = "Your combo points on your target's nameplate.",
-	["Widgets.DebuffWidget.Filtering"] = "|cffffd100Mode|r: which debuffs are shown. 'Mine' = only the ones you cast. White list = only the listed ones, black list = all except the listed ones, prefix = list entries starting with All / My / No. Put spell names in the list, one per line.",
+	["Widgets.DebuffWidget.Filtering"] = "|cffffd100Mode|r: which debuffs are shown. |cffffd100All Debuffs|r = everything; |cffffd100(Mine)|r = only the ones you cast; |cffffd100White List|r = only the debuffs in your list; |cffffd100Black List|r = all except the ones in your list; |cffffd100By Prefix|r = each list line says All / My / No.",
 	["Widgets.SocialWidget"] = "Small icon on the nameplates of your friends and guild members.",
 	["Widgets.TargetArtWidget"] = "Extra highlight (arrows, frame...) around your current target's nameplate.",
 }
@@ -4634,7 +4660,7 @@ local ITEM_HELP = {
 	["NameplateSettings.Alpha.BlizzFadeEnable.Adjustment"] = "How much more transparent the nameplates of non-target units get while you have a target.",
 	["NameplateSettings.Totems.TotemSettings.Toggles.HideHealth"] = "Show only the totem icon, no health bar.",
 	["Widgets.DebuffWidget.Filtering.Mode"] = "Which debuffs are shown (see the text above).",
-	["Widgets.DebuffWidget.Filtering.DebuffList"] = "Spell names for the white / black list and prefix modes, one per line.",
+	["Widgets.DebuffWidget.Filtering.DebuffList"] = "One spell name per line, then click Accept.",
 }
 
 local function FindOption(path)
