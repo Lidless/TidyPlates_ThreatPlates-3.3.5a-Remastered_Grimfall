@@ -12,7 +12,7 @@
 --                         focus (the game gives numbers only for these). DPS / Healer: how
 --                         close you are to pulling (100% = you pull); Tank: own threat,
 --                         100% = the mob is on you, lower = someone else has it.
---   * Quest mobs        : yellow "!" with the progress (3/10) on mobs you still need for a
+--   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
 --                         from tooltips (any line naming an objective / quest) and from loot.
 -----------------------------------------------------------------------------
@@ -495,24 +495,20 @@ local function GetDecor(ext)
 	ht:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	heal:Hide()
 	d.healer = heal
-	-- quest mark: yellow "!" left of the health bar, progress text left of it
+	-- quest mark: big yellow "!" above the nameplate (over the debuff row), progress right of it
 	local quest = CreateFrame("Frame", nil, ext)
-	quest:SetWidth(16)
-	quest:SetHeight(16)
+	quest:SetWidth(22)
+	quest:SetHeight(22)
 	quest:SetFrameLevel(ext:GetFrameLevel() + 6)
 	local qt = quest:CreateTexture(nil, "OVERLAY")
 	qt:SetAllPoints(quest)
 	qt:SetTexture(QUEST_TEXTURE)
 	local qs = quest:CreateFontString(nil, "OVERLAY")
-	qs:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	qs:SetFont(STANDARD_TEXT_FONT, 13, "OUTLINE")
 	qs:SetTextColor(1, 0.82, 0)
-	qs:SetPoint("RIGHT", quest, "LEFT", 0, 0)
+	qs:SetPoint("LEFT", quest, "RIGHT", 0, 0)
 	quest.text = qs
-	if bars and bars.healthbar then
-		quest:SetPoint("RIGHT", bars.healthbar, "LEFT", -2, 0)
-	else
-		quest:SetPoint("BOTTOM", ext, "TOP", 0, 0)
-	end
+	quest:SetPoint("CENTER", ext, "CENTER", -12, 52)
 	quest:Hide()
 	d.quest = quest
 	-- threat %
