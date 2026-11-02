@@ -583,7 +583,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, class icons, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight) and Friendly Nameplates (players: bar or name only, color; NPCs: name only).\n|cff89F559Profiles|r - save / copy / reset all settings."
+									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight) and Friendly Nameplates (players: bar or name only, color; NPCs: name only).\n|cff89F559Profiles|r - save / copy / reset all settings."
 								}
 							}
 						}
@@ -3727,127 +3727,6 @@ local function GetOptions()
 					type = "group",
 					order = 40,
 					args = {
-						ClassIconWidget = {
-							name = L["Class Icons"],
-							type = "group",
-							order = 0,
-							args = {
-								Enable = {
-									name = L["Enable"],
-									type = "group",
-									inline = true,
-									order = 10,
-									args = {
-										Toggle = {
-											name = L["Enable"],
-											type = "toggle",
-											order = 1,
-											desc = L["This widget will display class icons on nameplate with the settings you set below."],
-											descStyle = "inline",
-											width = "double",
-											set = SetValue,
-											get = GetValue,
-											arg = {"classWidget", "ON"}
-										}
-									}
-								},
-								Options = {
-									name = L["Options"],
-									type = "group",
-									inline = true,
-									order = 20,
-									disabled = function()
-										return not db.classWidget.ON
-									end,
-									args = {
-										FriendlyClass = {
-											name = L["Enable Friendly Icons"],
-											type = "toggle",
-											desc = L["Enable the showing of friendly player class icons."],
-											descStyle = "inline",
-											width = "double",
-											get = GetValue,
-											set = SetValue,
-											arg = {"friendlyClassIcon"}
-										},
-										FriendlyCaching = {
-											name = L["Friendly Caching"],
-											type = "toggle",
-											desc = L["This allows you to save friendly player class information between play sessions or nameplates going off the screen.|cffff0000(Uses more memory)"],
-											descStyle = "inline",
-											width = "double",
-											disabled = function()
-												return not (db.friendlyClassIcon and db.classWidget.ON)
-											end,
-											get = GetValue,
-											set = SetValue,
-											arg = {"cacheClass"}
-										}
-									}
-								},
-								Textures = {
-									name = L["Textures"],
-									type = "group",
-									inline = true,
-									order = 30,
-									disabled = function()
-										return not db.classWidget.ON
-									end,
-									args = {}
-								},
-								Sizing = {
-									name = L["Scale"],
-									type = "group",
-									inline = true,
-									order = 40,
-									disabled = function()
-										return not db.classWidget.ON
-									end,
-									args = {
-										ScaleSlider = {
-											name = "",
-											type = "range",
-											set = SetValue,
-											get = GetValue,
-											arg = {"classWidget", "scale"}
-										}
-									}
-								},
-								Placement = {
-									name = L["Placement"],
-									type = "group",
-									inline = true,
-									order = 50,
-									disabled = function()
-										return not db.classWidget.ON
-									end,
-									args = {
-										X = {
-											name = L["X"],
-											type = "range",
-											order = 1,
-											set = SetValue,
-											get = GetValue,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"classWidget", "x"}
-										},
-										Y = {
-											name = L["Y"],
-											type = "range",
-											order = 1,
-											set = SetValue,
-											get = GetValue,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"classWidget", "y"}
-										}
-									}
-								}
-							}
-						},
 						ComboPointWidget = {
 							name = L["Combo Points"],
 							type = "group",
@@ -4434,34 +4313,6 @@ local function GetOptions()
 			}
 		}
 	end
-	local ClassOpts_OrderCount = 1
-	local ClassOpts = {
-		Style = {
-			name = "Style",
-			order = -1,
-			type = "select",
-			width = "double",
-			get = GetValue,
-			set = function(info, val)
-				SetValue(info, val)
-				for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-					options.args.Widgets.args.ClassIconWidget.args.Textures.args["Prev" .. k_c].image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
-				end
-			end,
-			values = {default = "Default", transparent = "Transparent"},
-			arg = {"classWidget", "theme"}
-		}
-	}
-	for k_c, v_c in pairs(CLASS_SORT_ORDER) do
-		ClassOpts["Prev" .. k_c] = {
-			name = CLASS_SORT_ORDER[k_c],
-			type = "execute",
-			order = ClassOpts_OrderCount,
-			image = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\ClassIconWidget\\" .. db.classWidget.theme .. "\\" .. CLASS_SORT_ORDER[k_c]
-		}
-		ClassOpts_OrderCount = ClassOpts_OrderCount + 1
-	end
-	options.args.Widgets.args.ClassIconWidget.args.Textures.args = ClassOpts
 	local TotemOpts = {
 		TotemSettings = {
 			name = L["|cffffffffTotem Settings|r"],

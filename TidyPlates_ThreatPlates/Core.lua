@@ -99,7 +99,6 @@ function TidyPlatesThreat:OnInitialize()
 			threat = {tanking = false}
 		},
 		profile = {
-			cache = {},
 			OldSetting = true,
 			verbose = true,
 			blizzFade = {toggle = true, amount = -0.3},
@@ -107,8 +106,6 @@ function TidyPlatesThreat:OnInitialize()
 			customColor = true,
 			allowClass = true,
 			friendlyNameOnly = false,
-			friendlyClassIcon = true,
-			cacheClass = false,
 			castbarColor = {toggle = true, r = 1, g = 0, b = 0.8549019607843137, a = 1},
 			castbarColorShield = {toggle = true, r = 0.1019607843137255, g = 0.09803921568627451, b = 0.7294117647058823, a = 1},
 			aHPbarColor = {r = 0, g = 1, b = 0},
@@ -611,14 +608,6 @@ function TidyPlatesThreat:OnInitialize()
 				x = 0,
 				y = 35,
 				level = 1,
-				anchor = "CENTER"
-			},
-			classWidget = {
-				ON = false,
-				scale = 15,
-				x = -70,
-				y = 0,
-				theme = "default",
 				anchor = "CENTER"
 			},
 			targetWidget = {
@@ -1220,7 +1209,6 @@ local function EventHandler(self, event, ...)
 		elseif iType == "party" or iType == "raid" or iType == "none" then
 			DB.threat.ON = DB.OldSetting
 		end
-		DB.cache = {}
 		CharDB.threat.tanking = (TidyPlatesThreat:GetRole() == "TANK")
 		-- remind again when entering a dungeon / raid without a chosen role
 		if iType == "party" or iType == "raid" then
@@ -1232,8 +1220,6 @@ local function EventHandler(self, event, ...)
 		elseif not DB.threat.ON and (GetCVar("threatWarning") ~= 0) then
 			SetCVar("threatWarning", 0)
 		end
-	elseif event == "PLAYER_LOGOUT" then
-		DB.cache = {}
 	elseif event == "RAID_TARGET_UPDATE" then
 		TidyPlates:Update()
 	end

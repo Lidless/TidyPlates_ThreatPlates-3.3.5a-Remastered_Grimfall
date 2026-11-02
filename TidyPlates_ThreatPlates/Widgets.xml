@@ -4,7 +4,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 <Script file="Widgets\Widgets.lua" />
 <Script file="Widgets\EliteArtWidget.lua" />
 <Script file="Widgets\EliteArtOverlayWidget.lua" />
-<Script file="Widgets\ClassIconWidget.lua" />
 <Script file="Widgets\ComboPointWidget.lua" />
 <Script file="Widgets\SocialWidget.lua" />
 <Script file="Widgets\TargetArtWidget.lua" />

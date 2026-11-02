@@ -219,20 +219,6 @@ local function OnInitialize(plate)
 		w.TargetArt = nil
 	end
 
-	-- Class Icon Widget
-	if db.classWidget.ON then
-		if not w.ClassIconWidget then
-			local widget = ThreatPlatesWidgets.CreateClassIconWidget(plate)
-			widget:SetHeight(db.classWidget.scale)
-			widget:SetWidth(db.classWidget.scale)
-			widget:SetPoint((db.classWidget.anchor), plate, (db.classWidget.x), (db.classWidget.y))
-			w.ClassIconWidget = widget
-		end
-	elseif w.ClassIconWidget then
-		w.ClassIconWidget:Hide()
-		w.ClassIconWidget = nil
-	end
-
 	-- Elite Overlay Widget
 	if db.settings.elitehealthborder.show then
 		if not w.EliteOverlay then
@@ -360,16 +346,6 @@ local function OnUpdate(plate, unit)
 		w.SocialArt:SetWidth(db.socialWidget.scale)
 		w.SocialArt:SetPoint("CENTER", plate, db.socialWidget.anchor, db.socialWidget.x, db.socialWidget.y)
 		w.SocialArt:Update(unit)
-	end
-	-- Class Icons
-	if db.classWidget.ON then
-		if not w.ClassIconWidget then
-			OnInitialize(plate)
-		end
-		w.ClassIconWidget:SetHeight(db.classWidget.scale)
-		w.ClassIconWidget:SetWidth(db.classWidget.scale)
-		w.ClassIconWidget:SetPoint((db.classWidget.anchor), plate, (db.classWidget.x), (db.classWidget.y))
-		w.ClassIconWidget:Update(unit)
 	end
 	-- Totem Icons
 	if db.totemWidget.ON then
