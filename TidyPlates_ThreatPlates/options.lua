@@ -4570,6 +4570,119 @@ local function GetIntOptions()
 	return intoptions
 end
 
+-------------------------------------------------------------------------------
+-- Help texts (Grimfall edition): a short explanation at the top of the groups
+-- and next to the settings whose purpose is not obvious.
+-------------------------------------------------------------------------------
+local GROUP_HELP = {
+	-- Nameplate Settings
+	["NameplateSettings"] = "How the nameplates look: size, colors, texts, icons. These are the normal settings; in combat the |cff89F559Threat System|r can override alpha, scale and colors of mobs that fight you or your group.",
+	["NameplateSettings.GeneralSettings.Hiding"] = "Untick a mob type to hide its nameplates completely.",
+	["NameplateSettings.GeneralSettings.BlizzSettings"] = "The game's own nameplate switches (the same as in the game's Interface options). Friendly ones are under |cff89F559Nameplate Settings -> Friendly|r.",
+	["NameplateSettings.EnemyNameplates"] = "Extra warnings on enemy nameplates.",
+	["NameplateSettings.HealthBarTexture.Size"] = "Size of the health bar; the whole nameplate is built around it.",
+	["NameplateSettings.HealthBarTexture.HealthBarGroup"] = "Look of the health bar. |cffffd100Target|r / |cffffd100Mouseover|r: highlight on the nameplate of your target / of the mob under the mouse.",
+	["NameplateSettings.HealthBarTexture.Coloring"] = "Normal health bar colors. Order of priority: raid mark color > threat color (only in combat, |cff89F559Threat System -> Coloring|r) > the colors below.",
+	["NameplateSettings.HealthBarTexture.Coloring.ThreatColors"] = "The glowing frame around the health bar for mobs that are |cffffd100not|r handled by the Threat System (a mob type you switched off there, or the Threat System is disabled). Low / Medium / High = your threat on that mob.",
+	["NameplateSettings.HealthBarTexture.Coloring.CustomColors"] = "Use these colors instead of the game's colors. Friendly players have their own color: |cff89F559Nameplate Settings -> Friendly|r.",
+	["NameplateSettings.HealthBarTexture.Coloring.RaidMarkColors"] = "A mob with a raid mark (skull, cross...) gets the color of its mark; this wins over every other color, also in combat.",
+	["NameplateSettings.CastBarSettings"] = "The castbar under enemy nameplates while they cast.",
+	["NameplateSettings.CastBarSettings.Coloring"] = "Different castbar colors for casts you can interrupt and for shielded (uninterruptible) casts.",
+	["NameplateSettings.Alpha"] = "Transparency of nameplates when the Threat System does not change it (out of combat, or mob types without threat warnings). 1 = fully visible, 0 = invisible.",
+	["NameplateSettings.Scale"] = "Size of nameplates when the Threat System does not change it. |cffffd100Target|r: size of your target's nameplate.",
+	["NameplateSettings.Nametext"] = "The name of the unit on the nameplate.",
+	["NameplateSettings.Healthtext"] = "Health as a number and / or percent on the health bar.",
+	["NameplateSettings.SpellText"] = "Name of the spell the enemy is casting, on the castbar.",
+	["NameplateSettings.Leveltext"] = "Level of the unit.",
+	["NameplateSettings.EliteIcon"] = "Dragon icon on elite mobs.",
+	["NameplateSettings.SkullIcon"] = "Skull icon on bosses and mobs far above your level.",
+	["NameplateSettings.SpellIcon"] = "Icon of the spell being cast, next to the castbar.",
+	["NameplateSettings.Raidmarks"] = "Raid target mark (skull, cross, star...) on the nameplate.",
+	["NameplateSettings.Totems"] = "Nameplates of shaman totems: each totem can get its own icon and health bar color, or be hidden.",
+	["NameplateSettings.Totems.TotemSettings.Toggles"] = "|cffffd100Hide Healthbars|r: show only the totem icon, without a health bar.",
+	-- Threat System
+	["ThreatOptions"] = "Threat warnings follow your |cff89F559Role|r. They work |cffffd100only in combat|r and only on mobs that fight you or your group: then the alpha, scale, colors and glowing frame set here |cffffd100override|r the Nameplate Settings. Out of combat the Nameplate Settings apply again.",
+	["ThreatOptions.GeneralSettings"] = "These settings only work |cffffd100in combat|r: then they override the normal Nameplate Settings (alpha, scale, colors) of the mobs fighting you or your group. Out of combat the Nameplate Settings apply.\n\nHere: which mob types get threat warnings.",
+	["ThreatOptions.Alpha"] = "How visible a warned nameplate is at each threat level (in combat). 1 = fully visible, lower = more transparent.\n|cff00ff00Tank|r: 'Low threat' is the bad state (mob not on you). |cffff0000DPS/Healing|r: 'High threat' is the bad state (mob on you).",
+	["ThreatOptions.Scale"] = "How big a warned nameplate is at each threat level (in combat). Bigger = stands out more.\n|cff00ff00Tank|r: 'Low threat' is the bad state. |cffff0000DPS/Healing|r: 'High threat' is the bad state.",
+	["ThreatOptions.Scale.TypeSpecific"] = "Extra size added on top of the above for normal, elite and boss mobs.",
+	["ThreatOptions.Coloring"] = "Health bar colors at each threat level (in combat); they override the normal health bar colors. A fully transparent color (alpha 0) means: keep the normal color.",
+	["ThreatOptions.Textures"] = "The glowing frame around warned nameplates (in combat).",
+	["ThreatOptions.Alpha.Marked"] = "Mobs with a raid mark (e.g. crowd controlled ones) can be left out of the threat alpha change.",
+	["ThreatOptions.Scale.Marked"] = "Mobs with a raid mark (e.g. crowd controlled ones) can be left out of the threat size change.",
+	-- Widgets
+	["Widgets"] = "Extra icons and texts on the nameplates.",
+	["Widgets.ComboPointWidget"] = "Your combo points on your target's nameplate.",
+	["Widgets.DebuffWidget.Filtering"] = "|cffffd100Mode|r: which debuffs are shown. 'Mine' = only the ones you cast. White list = only the listed ones, black list = all except the listed ones, prefix = list entries starting with All / My / No. Put spell names in the list, one per line.",
+	["Widgets.SocialWidget"] = "Small icon on the nameplates of your friends and guild members.",
+	["Widgets.TargetArtWidget"] = "Extra highlight (arrows, frame...) around your current target's nameplate.",
+}
+
+local ITEM_HELP = {
+	["ThreatOptions.Enable"] = "Master switch of all threat warnings.",
+	["NameplateSettings.EnemyNameplates.Execute.Percent"] = "The mark is drawn at this health %.",
+	["NameplateSettings.EnemyNameplates.CastHighlight.List"] = "One spell per line, name or spell ID. Interrupted spells are added here automatically if learning is on.",
+	["NameplateSettings.Friendly.Players.Mode"] = "Health bar, or only the name (the bar appears while the player is damaged).",
+	["NameplateSettings.Friendly.Effects.Dispel"] = "Tick what you can remove; crowd control of these types on group members blinks.",
+	["NameplateSettings.HealthBarTexture.Coloring.ThreatColors.ThreatGlow"] = "Show the glowing threat frame around the health bar.",
+	["NameplateSettings.HealthBarTexture.Coloring.CustomColors.Enable"] = "Use the colors below instead of the game's colors.",
+	["NameplateSettings.HealthBarTexture.Coloring.RaidMarkColors.Enable"] = "Color the health bar of marked mobs by their mark.",
+	["NameplateSettings.HealthBarTexture.Coloring.ColorByHPLevel"] = "Green at full health, turning red as health drops. Replaces the colors below.",
+	["NameplateSettings.CastBarSettings.Toggles.CastbarToggle"] = "Show a castbar when an enemy casts.",
+	["NameplateSettings.CastBarSettings.Coloring.Enable"] = "Color interruptible casts with the color below.",
+	["NameplateSettings.CastBarSettings.Coloring.Enable2"] = "Color uninterruptible (shielded) casts with the color below.",
+	["NameplateSettings.Alpha.BlizzFadeEnable.Adjustment"] = "How much more transparent the nameplates of non-target units get while you have a target.",
+	["NameplateSettings.Totems.TotemSettings.Toggles.HideHealth"] = "Show only the totem icon, no health bar.",
+	["Widgets.DebuffWidget.Filtering.Mode"] = "Which debuffs are shown (see the text above).",
+	["Widgets.DebuffWidget.Filtering.DebuffList"] = "Spell names for the white / black list and prefix modes, one per line.",
+}
+
+local function FindOption(path)
+	local node = options
+	for key in string.gmatch(path, "[^%.]+") do
+		node = node and node.args and node.args[key]
+	end
+	return node
+end
+
+local function AddHelpTexts()
+	for path, text in pairs(GROUP_HELP) do
+		local group = FindOption(path)
+		if group and group.args then
+			-- make room at the top: the help text goes first
+			local minOrder
+			for _, v in pairs(group.args) do
+				if type(v.order) == "number" and v.order >= 0 and (not minOrder or v.order < minOrder) then
+					minOrder = v.order
+				end
+			end
+			if minOrder and minOrder <= 0 then
+				for _, v in pairs(group.args) do
+					if type(v.order) == "number" and v.order >= 0 then
+						v.order = v.order + 1
+					end
+				end
+				minOrder = minOrder + 1
+			end
+			group.args.GrimfallHelp = {
+				type = "description",
+				order = minOrder and (minOrder / 2) or 0,
+				fontSize = "medium",
+				name = text .. "\n"
+			}
+		end
+	end
+	for path, text in pairs(ITEM_HELP) do
+		local item = FindOption(path)
+		if item then
+			item.desc = text
+			if item.type == "toggle" then
+				item.descStyle = "inline"
+			end
+		end
+	end
+end
+
 function TidyPlatesThreat:OpenOptions(group)
 	HideUIPanel(InterfaceOptionsFrame)
 	HideUIPanel(GameMenuFrame)
@@ -4602,6 +4715,7 @@ function TidyPlatesThreat:SetUpOptions()
 	db = self.db.profile
 
 	GetOptions()
+	AddHelpTexts()
 
 
 

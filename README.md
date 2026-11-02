@@ -104,6 +104,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   (color: `/tptp` → Nameplate Settings → Friendly). Friendly class colors were removed: with custom
   classes and the classless realm they would not mean anything.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
+- Short **help texts** at the top of the option groups and next to settings whose purpose is not obvious (e.g. the
+  Threat System settings only override the Nameplate Settings in combat).
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
 - No "set your theme to Threat Plates?" popup: the theme is selected automatically.
 - Options cleaned up: duplicated settings merged, a switch that did nothing (friendly *Click Through*) removed.
