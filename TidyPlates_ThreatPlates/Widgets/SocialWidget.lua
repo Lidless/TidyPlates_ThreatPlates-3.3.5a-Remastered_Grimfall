@@ -9,7 +9,6 @@ local weaktable = TidyPlatesUtility.weaktable
 local ListTable = {}
 ListTable.g = setmetatable({}, weaktable)
 ListTable.f = setmetatable({}, weaktable)
-local eventsRegistered = true
 
 local function EventHandler(self, event, ...)
 	if event == "PLAYER_ENTERING_WORLD" then
@@ -33,6 +32,7 @@ local function EventHandler(self, event, ...)
 	end
 end
 
+-- the lists are kept up to date even while the widget is off, so turning it on needs no /reload
 f:SetScript("OnEvent", function(self, event, ...) EventHandler(self, event, ...) end)
 
 local path = "Interface\\AddOns\\TidyPlates_ThreatPlates\\Widgets\\SocialWidget\\"
@@ -49,10 +49,8 @@ local function UpdateSocialWidget(frame, unit)
 		else
 			frame:Hide()
 		end
-		f:SetScript("OnEvent", function(self, event, ...) EventHandler(self, event, ...) end)
 	else
 		frame:Hide()
-		f:SetScript("OnEvent", nil)
 	end
 end
 local function CreateSocialWidget(parent)
