@@ -8,6 +8,10 @@
 --   * Enemy healers     : big heal icon above enemy healers. Players: in battlegrounds and
 --                         arenas; NPCs: everywhere. A unit counts as healer after healing
 --                         others 3 times (the client has no role info for enemies).
+--   * Threat %          : threat number above the health bar of your target / mouseover /
+--                         focus (the game gives numbers only for these). DPS / Healer: how
+--                         close you are to pulling (100% = you pull); Tank: the highest
+--                         threat of the others compared to you.
 --   * Quest mobs        : yellow "!" with the progress (3/10) on mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
 --                         from tooltips (any line naming an objective / quest) and from loot.
@@ -152,6 +156,91 @@ end
 
 function TidyPlatesThreat.IsEnemyHealer(name)
 	return name and healers[ShortName(name)] or false
+end
+
+-------------------------------------------------------------------------------
+-- Threat %
+-------------------------------------------------------------------------------
+local function PlateUnitId(unit)
+	if unit.isTarget then
+		return "target"
+	elseif unit.isMouseover then
+		return "mouseover"
+	end
+	-- focus: same name and same health as the plate
+	if UnitExists("focus") and UnitName("focus") == unit.name and UnitHealth("focus") == unit.health then
+		return "focus"
+	end
+end
+
+local function HighestOtherThreat(uid)
+	local best
+	local raid = GetNumRaidMembers()
+	local n, prefix = raid, "raid"
+	if raid == 0 then
+		n, prefix = GetNumPartyMembers(), "party"
+	end
+	for i = 1, n do
+		local member = prefix .. i
+		if not UnitIsUnit(member, "player") then
+			local _, _, pct = UnitDetailedThreatSituation(member, uid)
+			if pct and (not best or pct > best) then
+				best = pct
+			end
+			local pet = prefix .. "pet" .. i
+			if UnitExists(pet) then
+				_, _, pct = UnitDetailedThreatSituation(pet, uid)
+				if pct and (not best or pct > best) then
+					best = pct
+				end
+			end
+		end
+	end
+	if UnitExists("pet") then
+		local _, _, pct = UnitDetailedThreatSituation("pet", uid)
+		if pct and (not best or pct > best) then
+			best = pct
+		end
+	end
+	return best
+end
+
+-- returns text, r, g, b (nil = nothing to show)
+local function ThreatText(unit)
+	local uid = PlateUnitId(unit)
+	if not uid or not UnitAffectingCombat(uid) then
+		return
+	end
+	local isTanking, _, pct = UnitDetailedThreatSituation("player", uid)
+	if TidyPlatesThreat:GetRole() == "TANK" then
+		if isTanking then
+			local other = HighestOtherThreat(uid)
+			if not other then
+				return
+			end
+			other = math.floor(other + 0.5)
+			if other >= 90 then
+				return other .. "%", 1, 0.2, 0.2
+			elseif other >= 70 then
+				return other .. "%", 1, 0.6, 0.1
+			end
+			return other .. "%", 0.3, 1, 0.3
+		elseif pct then
+			-- the mob is not on you: your own threat compared to the one who has it
+			return math.floor(pct + 0.5) .. "%", 1, 0.2, 0.2
+		end
+		return
+	end
+	if not pct then
+		return
+	end
+	pct = math.floor(pct + 0.5)
+	if isTanking or pct >= 90 then
+		return pct .. "%", 1, 0.2, 0.2
+	elseif pct >= 70 then
+		return pct .. "%", 1, 0.6, 0.1
+	end
+	return pct .. "%", 1, 1, 1
 end
 
 -------------------------------------------------------------------------------
@@ -433,6 +522,18 @@ local function GetDecor(ext)
 	end
 	quest:Hide()
 	d.quest = quest
+	-- threat %
+	local tp = CreateFrame("Frame", nil, ext)
+	tp:SetWidth(40)
+	tp:SetHeight(14)
+	tp:SetFrameLevel(ext:GetFrameLevel() + 6)
+	local tpt = tp:CreateFontString(nil, "OVERLAY")
+	tpt:SetPoint("BOTTOMRIGHT", tp, "BOTTOMRIGHT", 0, 0)
+	tpt:SetJustifyH("RIGHT")
+	tp.text = tpt
+	tp.hb = bars and bars.healthbar
+	tp:Hide()
+	d.threatPct = tp
 
 	decor[ext] = d
 	return d
@@ -513,6 +614,31 @@ local function UpdatePlates(elapsed)
 				d.healer:Show()
 			else
 				d.healer:Hide()
+			end
+
+			-- threat %
+			local tpc = db.threatPercent
+			local ttext, tr, tg, tb
+			if enemy and tpc and tpc.ON then
+				ttext, tr, tg, tb = ThreatText(unit)
+			end
+			if ttext then
+				local tp = d.threatPct
+				if tp.size ~= tpc.size then
+					tp.text:SetFont(STANDARD_TEXT_FONT, tpc.size or 11, "OUTLINE")
+					tp.size = tpc.size
+				end
+				tp:ClearAllPoints()
+				if tp.hb then
+					tp:SetPoint("BOTTOMRIGHT", tp.hb, "TOPRIGHT", tpc.x or 0, tpc.y or 2)
+				else
+					tp:SetPoint("BOTTOM", ext, "TOP", tpc.x or 0, tpc.y or 2)
+				end
+				tp.text:SetText(ttext)
+				tp.text:SetTextColor(tr, tg, tb)
+				tp:Show()
+			else
+				d.threatPct:Hide()
 			end
 
 			-- quest mark

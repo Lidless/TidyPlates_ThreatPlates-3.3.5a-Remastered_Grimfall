@@ -571,7 +571,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight), Totem Nameplates, and Friendly: which friendly nameplates are shown, players (bar or name only, color), NPCs (name only), HoTs and crowd control on group members.\n|cff89F559Reset|r - the button below puts all settings back to the defaults."
+									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, threat %, target highlight, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight), Totem Nameplates, and Friendly: which friendly nameplates are shown, players (bar or name only, color), NPCs (name only), HoTs and crowd control on group members.\n|cff89F559Reset|r - the button below puts all settings back to the defaults."
 								}
 							}
 						},
@@ -4192,65 +4192,79 @@ local function GetOptions()
 								}
 							}
 						},
-						ThreatLineWidget = {
-							name = L["Threat Line"],
+						ThreatPercent = {
+							name = "Threat %",
 							type = "group",
 							order = 40,
-							set = SetValue,
-							get = GetValue,
 							args = {
-								Enable = {
-									name = L["Enable"],
-									type = "group",
-									inline = true,
-									order = 10,
-									args = {
-										Toggle = {
-											name = L["Enable"],
-											type = "toggle",
-											order = 1,
-											desc = L["This widget will display a small bar that will display your current threat relative to other players on your target nameplate or recently mousedover namplates."],
-											descStyle = "inline",
-											width = "double",
-											arg = {"threatWidget", "ON"}
-										}
-									}
+								Info = {
+									type = "description",
+									order = 0,
+									fontSize = "medium",
+									name = "Your threat as a number above the right end of the health bar, in combat. The game gives threat numbers only for your |cffffd100target|r, the mob under your |cffffd100mouse|r and your |cffffd100focus|r, so only these show it.\n|cffFFA61ADPS|r / |cffFF3333Healer|r: how close you are to pulling aggro; 100% = you pull (white, orange from 70%, red from 90% or when the mob is on you).\n|cff40FF40Tank|r: the highest threat of the others compared to yours; near 100% someone is about to take the mob (green, orange from 70%, red from 90%). Red own % when the mob is not on you.\n"
 								},
-								Placement = {
-									name = L["Placement"],
-									type = "group",
-									inline = true,
-									order = 20,
-									disabled = function()
-										return not db.threatWidget.ON
+								Toggle = {
+									name = L["Enable"],
+									type = "toggle",
+									order = 1,
+									width = "double",
+									get = function()
+										return db.threatPercent.ON
 									end,
-									args = {
-										X = {
-											name = L["X"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"threatWidget", "x"}
-										},
-										Y = {
-											name = L["Y"],
-											type = "range",
-											order = 1,
-											min = -120,
-											max = 120,
-											step = 1,
-											arg = {"threatWidget", "y"}
-										},
-										Anchor = {
-											name = L["Anchor"],
-											type = "select",
-											order = 4,
-											values = FullAlign,
-											arg = {"threatWidget", "anchor"}
-										}
-									}
+									set = function(info, val)
+										db.threatPercent.ON = val
+									end
+								},
+								Size = {
+									name = "Font size",
+									type = "range",
+									order = 2,
+									min = 6,
+									max = 24,
+									step = 1,
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.size
+									end,
+									set = function(info, val)
+										db.threatPercent.size = val
+									end
+								},
+								X = {
+									name = L["X"],
+									type = "range",
+									order = 3,
+									min = -120,
+									max = 120,
+									step = 1,
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.x
+									end,
+									set = function(info, val)
+										db.threatPercent.x = val
+									end
+								},
+								Y = {
+									name = L["Y"],
+									type = "range",
+									order = 4,
+									min = -60,
+									max = 60,
+									step = 1,
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.y
+									end,
+									set = function(info, val)
+										db.threatPercent.y = val
+									end
 								}
 							}
 						},

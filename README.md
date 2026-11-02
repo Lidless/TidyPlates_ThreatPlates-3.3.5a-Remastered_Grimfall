@@ -106,6 +106,13 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 - **Nameplate Settings → Friendly**: friendly players with a light blue health bar or **name only** (the bar
   appears while damaged), their color; friendly NPCs name only. All friendly settings are in this one place.
 
+#### Threat %
+`/tptp` → Widgets → *Threat %* (on by default; replaces the old, hard to read *Threat Line* widget): your threat as a
+number above the health bar, in combat. The game gives threat numbers only for your target, mouseover and focus.
+- DPS / Healer: how close you are to pulling aggro (100% = you pull); white, orange from 70%, red from 90% or with aggro.
+- Tank: the highest threat of the others compared to yours (green, orange from 70%, red from 90%); red own % when the
+  mob is not on you.
+
 #### Other changes
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
   (color: `/tptp` → Nameplate Settings → Friendly). Friendly class colors were removed: with custom

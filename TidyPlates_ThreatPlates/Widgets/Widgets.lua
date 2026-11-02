@@ -242,18 +242,6 @@ local function OnInitialize(plate)
 		w.TargetOfWidget = nil
 	end
 
-	-- Threat Line Widget
-	if db.threatWidget.ON then
-		if not w.ThreatLineWidget then
-			local widget = TidyPlatesWidgets.CreateThreatLineWidget(plate)
-			widget:SetPoint(db.threatWidget.anchor, plate, db.threatWidget.x, db.threatWidget.y)
-			widget:SetFrameLevel(plate:GetFrameLevel() + 3)
-			w.ThreatLineWidget = widget
-		end
-	elseif w.ThreatLineWidget then
-		w.ThreatLineWidget:Hide()
-		w.ThreatLineWidget = nil
-	end
 
 	-- Combo Point Widget
 	if db.comboWidget.ON then
@@ -292,14 +280,6 @@ local function OnContextUpdate(plate, unit)
 		w.ComboPoints:UpdateContext(unit)
 	end
 
-	--Threat Line Widget
-	if db.threatWidget.ON and unit.class == "UNKNOWN" then
-		if not w.ThreatLineWidget then
-			OnInitialize(plate)
-		end
-		w.ThreatLineWidget:SetPoint("CENTER", plate, (db.threatWidget.x), db.threatWidget.y)
-		w.ThreatLineWidget:UpdateContext(unit)
-	end
 end
 -------------------
 -- NORMAL UPDATE --
