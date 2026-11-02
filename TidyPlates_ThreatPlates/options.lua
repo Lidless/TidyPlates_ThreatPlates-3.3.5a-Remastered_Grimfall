@@ -4805,26 +4805,23 @@ end
 local intoptions = nil
 local function GetIntOptions()
 	if not intoptions then
+		-- Interface -> AddOns: just a button that opens the options
 		intoptions = {
-			name = TidyPlatesThreat.title,
+			name = "Threat Plates",
 			handler = TidyPlatesThreat,
 			type = "group",
 			args = {
-				note = {
-					type = "description",
-					name = L["You can access the "] .. TidyPlatesThreat.title .. L[" options by typing: /tptp"],
-					order = 10
-				},
 				openoptions = {
 					type = "execute",
-					name = L["Open Config"],
-					image = path .. "Logo",
-					width = "double",
-					imageWidth = 256,
-					imageHeight = 32,
+					name = "Open Options",
 					func = function()
 						TidyPlatesThreat:OpenOptions()
 					end,
+					order = 10
+				},
+				note = {
+					type = "description",
+					name = "\nOr type |cffffd100/tptp|r in chat.",
 					order = 20
 				}
 			}
