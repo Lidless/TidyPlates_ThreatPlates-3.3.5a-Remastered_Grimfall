@@ -4215,6 +4215,40 @@ local function GetOptions()
 										db.threatPercent.ON = val
 									end
 								},
+								Blink = {
+									name = "Blink on level change",
+									type = "toggle",
+									order = 1.2,
+									width = "double",
+									desc = "The number flashes twice when its color changes (e.g. white -> orange).",
+									descStyle = "inline",
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.blink
+									end,
+									set = function(info, val)
+										db.threatPercent.blink = val
+									end
+								},
+								Sound = {
+									name = "Sound when it gets dangerous",
+									type = "toggle",
+									order = 1.4,
+									width = "double",
+									desc = "Only for your target. DPS / Healer: reaching 90% (soft beep) or pulling aggro (warning); Tank: losing the mob (warning). The aggro pull is silent here when the game's own 'Play Aggro Sounds' (Interface -> Combat) is on, so it never sounds twice.",
+									descStyle = "inline",
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.sound
+									end,
+									set = function(info, val)
+										db.threatPercent.sound = val
+									end
+								},
 								Size = {
 									name = "Font size",
 									type = "range",

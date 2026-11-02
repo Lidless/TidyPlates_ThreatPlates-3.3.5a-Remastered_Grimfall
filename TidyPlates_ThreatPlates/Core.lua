@@ -179,7 +179,7 @@ function TidyPlatesThreat:OnInitialize()
 				size = 11,
 				anchor = "CENTER"
 			},
-			threatPercent = {ON = true, size = 11, x = 0, y = 2},
+			threatPercent = {ON = true, size = 11, x = 0, y = 2, blink = true, sound = true},
 			tankedWidget = {
 				ON = false,
 				scale = 16,
@@ -687,9 +687,9 @@ local function EventHandler(self, event, ...)
 			TidyPlatesThreat:RoleReminder()
 		end
 	elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
-		if DB.threat.ON and (GetCVar("threatWarning") ~= 3) then
+		if DB.threat.ON and (GetCVar("threatWarning") ~= "3") then
 			SetCVar("threatWarning", 3)
-		elseif not DB.threat.ON and (GetCVar("threatWarning") ~= 0) then
+		elseif not DB.threat.ON and (GetCVar("threatWarning") ~= "0") then
 			SetCVar("threatWarning", 0)
 		end
 	elseif event == "RAID_TARGET_UPDATE" then

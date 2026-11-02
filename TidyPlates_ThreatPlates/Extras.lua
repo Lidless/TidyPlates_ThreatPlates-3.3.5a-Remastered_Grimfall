@@ -173,7 +173,9 @@ local function PlateUnitId(unit)
 	end
 end
 
--- returns text, r, g, b (nil = nothing to show)
+-- returns text, r, g, b, band, uid (nil = nothing to show)
+-- bands: DPS / Healer "low" < 70% <= "mid" < 90% <= "high", "aggro" = the mob is on you
+--        Tank "ok" = the mob is on you, "close" >= 90%, "mid" >= 70%, "low" below
 local function ThreatText(unit)
 	local uid = PlateUnitId(unit)
 	if not uid or not UnitAffectingCombat(uid) then
@@ -184,28 +186,54 @@ local function ThreatText(unit)
 		-- tank: own threat. 100% white = the mob is on you; below 100% someone else has it:
 		-- orange from 90% (you take it back soon), yellow from 70%, red below
 		if isTanking then
-			return "100%", 1, 1, 1
+			return "100%", 1, 1, 1, "ok", uid
 		elseif not pct then
 			return
 		end
 		pct = math.floor(pct + 0.5)
 		if pct >= 90 then
-			return pct .. "%", 1, 0.6, 0.1
+			return pct .. "%", 1, 0.6, 0.1, "close", uid
 		elseif pct >= 70 then
-			return pct .. "%", 1, 1, 0.2
+			return pct .. "%", 1, 1, 0.2, "mid", uid
 		end
-		return pct .. "%", 1, 0.2, 0.2
+		return pct .. "%", 1, 0.2, 0.2, "low", uid
 	end
 	if not pct then
 		return
 	end
 	pct = math.floor(pct + 0.5)
-	if isTanking or pct >= 90 then
-		return pct .. "%", 1, 0.2, 0.2
+	if isTanking then
+		return pct .. "%", 1, 0.2, 0.2, "aggro", uid
+	elseif pct >= 90 then
+		return pct .. "%", 1, 0.2, 0.2, "high", uid
 	elseif pct >= 70 then
-		return pct .. "%", 1, 0.6, 0.1
+		return pct .. "%", 1, 0.6, 0.1, "mid", uid
 	end
-	return pct .. "%", 1, 1, 1
+	return pct .. "%", 1, 1, 1, "low", uid
+end
+
+-- sound when it gets dangerous (target only): DPS / Healer reaching 90% or pulling aggro,
+-- tank losing the mob. The aggro pull itself is skipped when the game's own
+-- "Play Aggro Sounds" is on, so it never sounds twice.
+local DANGER_RANK = {low = 0, mid = 1, high = 2, aggro = 3}
+local function ThreatSound(oldBand, newBand)
+	if TidyPlatesThreat:GetRole() == "TANK" then
+		if oldBand == "ok" and newBand ~= "ok" then
+			PlaySound("RaidWarning")
+		end
+		return
+	end
+	local o, n = DANGER_RANK[oldBand], DANGER_RANK[newBand]
+	if not (o and n) or n <= o or n < 2 then
+		return
+	end
+	if newBand == "aggro" then
+		if GetCVar("threatPlaySounds") ~= "1" then
+			PlaySound("RaidWarning")
+		end
+	elseif o < 2 then
+		PlaySoundFile("Sound\\Interface\\AlarmClockWarning3.wav")
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -583,12 +611,31 @@ local function UpdatePlates(elapsed)
 
 			-- threat %
 			local tpc = db.threatPercent
-			local ttext, tr, tg, tb
+			local ttext, tr, tg, tb, band, tuid
 			if enemy and tpc and tpc.ON then
-				ttext, tr, tg, tb = ThreatText(unit)
+				ttext, tr, tg, tb, band, tuid = ThreatText(unit)
 			end
 			if ttext then
 				local tp = d.threatPct
+				-- level change on the same mob: blink twice (and maybe a sound); a mob that
+				-- just appeared (new target / mouseover) never blinks
+				if tp.mob == unit.name and tp.band and tp.band ~= band then
+					if tpc.blink then
+						tp.blinkUntil = clock + 0.8
+					end
+					if tpc.sound and tuid == "target" then
+						ThreatSound(tp.band, band)
+					end
+				end
+				tp.mob, tp.band = unit.name, band
+				if tp.blinkUntil and tp.blinkUntil > clock then
+					-- 4 phases in 0.8 s: off / on / off / on = two flashes
+					local phase = math.floor((tp.blinkUntil - clock) / 0.2)
+					tp.text:SetAlpha((phase % 2 == 1) and 0.1 or 1)
+				else
+					tp.blinkUntil = nil
+					tp.text:SetAlpha(1)
+				end
 				if tp.size ~= tpc.size then
 					tp.text:SetFont(STANDARD_TEXT_FONT, tpc.size or 11, "OUTLINE")
 					tp.size = tpc.size
@@ -603,6 +650,7 @@ local function UpdatePlates(elapsed)
 				tp.text:SetTextColor(tr, tg, tb)
 				tp:Show()
 			else
+				d.threatPct.mob, d.threatPct.band, d.threatPct.blinkUntil = nil, nil, nil
 				d.threatPct:Hide()
 			end
 

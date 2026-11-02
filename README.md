@@ -112,6 +112,9 @@ number above the health bar, in combat. The game gives threat numbers only for y
 - DPS / Healer: how close you are to pulling aggro (100% = you pull); white, orange from 70%, red from 90% or with aggro.
 - Tank: your own threat. White 100% = the mob is on you; below 100% someone else has it: orange from 90% (you take
   it back soon), yellow from 70%, red below.
+- The number **blinks twice** when its color changes, and a **sound** plays for your target when it gets dangerous
+  (DPS / Healer: reaching 90% or pulling aggro; Tank: losing the mob). The aggro pull is silent when the game's own
+  *Play Aggro Sounds* is on, so it never sounds twice. Both can be turned off.
 
 #### Other changes
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
