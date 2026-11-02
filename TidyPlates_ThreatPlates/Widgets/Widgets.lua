@@ -99,7 +99,7 @@ local function IsCC(debuff)
 	return cc and debuff.name and cc[debuff.name] and true or false
 end
 
--- Friendly auras are enabled in "Friendly Targets"
+-- Friendly auras are enabled in the "Friendly" tab
 TidyPlatesWidgets.AllowFriendlyAuras = function()
 	local p = TidyPlatesThreat.db and TidyPlatesThreat.db.profile
 	local f = p and p.friendlyAuras

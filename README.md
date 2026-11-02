@@ -84,7 +84,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 #### DoTs, crowd control and HoTs on nameplates
 - **Enemies** (`/tptp` → Widgets → Debuffs, now on by default): your own DoTs / debuffs with the time left, plus
   **crowd control from anyone** (stun, fear, polymorph...) marked with a glow. Mode can be changed (all debuffs, lists...).
-- **Friendly Targets** tab: your **HoTs and short buffs** and **crowd control** on party / raid members' nameplates
+- **Friendly** tab: your **HoTs and short buffs** and **crowd control** on party / raid members' nameplates
   (both off by default; friendly nameplates must be shown, Shift+V or the switch in the tab).
 
 #### Execute line, cast highlight, dispellable buffs
@@ -94,19 +94,22 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   from your list. Spells interrupted by you or your group are **learned automatically**.
 - **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a
   magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
-- **Friendly Targets**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
+- **Friendly** tab: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
   icons on group members **blink**.
-- **Friendly Nameplates** (Nameplate Settings): friendly players with a light blue health bar or **name only** (the bar
+- **Friendly** tab: friendly players with a light blue health bar or **name only** (the bar
   appears while damaged), their color; friendly NPCs name only. All friendly settings are in this one place.
 
 #### Other changes
 - **Friendly players** have a **light blue** health bar, friendly NPCs stay green, so players stand out in cities
-  (color: `/tptp` → Nameplate Settings → Friendly Nameplates). Friendly class colors were removed: with custom
+  (color: `/tptp` → Friendly). Friendly class colors were removed: with custom
   classes and the classless realm they would not mean anything.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.
 - No "set your theme to Threat Plates?" popup: the theme is selected automatically.
 - Options cleaned up: duplicated settings merged, a switch that did nothing (friendly *Click Through*) removed.
+  All friendly settings (which friendly nameplates are shown, players, NPCs, group effects) are in one **Friendly** tab,
+  *Totem Nameplates* moved under Nameplate Settings, the *Profiles* tab was replaced by a **Reset all settings** button
+  in the Help tab.
 - **About** tab cleaned up (no donate / Discord links, no translator list).
 - All addon texts are English.
 

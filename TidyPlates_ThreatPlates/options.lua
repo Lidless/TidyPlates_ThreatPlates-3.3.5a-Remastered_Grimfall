@@ -541,7 +541,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Enemies|r (Widgets -> Debuffs): by default your own DoTs / debuffs are shown above the nameplate with the time left, plus crowd control (stun, fear, polymorph...) from anyone, marked with a glow. The mode can be changed (all debuffs, white / black list...).\n\n|cff89F559Friendly players|r (Friendly Targets tab): your HoTs and short buffs, and crowd control on party / raid members. Friendly nameplates must be shown (Shift+V).\n\nLimit of the 3.3.5 client: exact durations are known for your target, focus, mouseover and group members; on other mobs the effects come from the combat log."
+									name = "|cff89F559Enemies|r (Widgets -> Debuffs): by default your own DoTs / debuffs are shown above the nameplate with the time left, plus crowd control (stun, fear, polymorph...) from anyone, marked with a glow. The mode can be changed (all debuffs, white / black list...).\n\n|cff89F559Friendly players|r (Friendly tab): your HoTs and short buffs, and crowd control on party / raid members. Friendly nameplates must be shown (Shift+V).\n\nLimit of the 3.3.5 client: exact durations are known for your target, focus, mouseover and group members; on other mobs the effects come from the combat log."
 								}
 							}
 						},
@@ -555,7 +555,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly Targets|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly Nameplates|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly|r tab: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Friendly|r tab: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -583,10 +583,35 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight) and Friendly Nameplates (players: bar or name only, color; NPCs: name only).\n|cff89F559Profiles|r - save / copy / reset all settings."
+									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight), Totem Nameplates.\n|cff89F559Friendly|r - which friendly nameplates are shown, players (bar or name only, color), NPCs (name only), HoTs and crowd control on group members.\n|cff89F559Reset|r - the button below puts all settings back to the defaults."
 								}
 							}
-						}
+						},
+						Reset = {
+							name = "Reset",
+							type = "group",
+							inline = true,
+							order = 6,
+							args = {
+								Text = {
+									type = "description",
+									order = 1,
+									name = "Messed up the settings? This puts every Threat Plates setting back to the defaults. Your role is kept.\n"
+								},
+								Button = {
+									name = "Reset all settings",
+									type = "execute",
+									order = 2,
+									width = "double",
+									confirm = true,
+									confirmText = "Reset all Threat Plates settings to the defaults?",
+									func = function()
+										TidyPlatesThreat.db:ResetProfile()
+										TidyPlatesThreat:ConfigRefresh()
+									end
+								}
+							}
+						},
 					}
 				},
 				-- Config Guide
@@ -655,58 +680,6 @@ local function GetOptions()
 												LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates")
 											end
 										},
-										Friendly = {
-											type = "group",
-											name = L["Friendly"],
-											order = 2,
-											inline = true,
-											args = {
-												nameplateShowFriends = {
-													name = L["Show Friends"],
-													type = "toggle",
-													order = 1,
-													get = function()
-														return (GetCVar("nameplateShowFriends") == "1")
-													end,
-													set = function()
-														SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
-													end
-												},
-												nameplateShowFriendlyTotems = {
-													name = L["Show Friendly Totems"],
-													type = "toggle",
-													order = 2,
-													get = function()
-														return (GetCVar("nameplateShowFriendlyTotems") == "1")
-													end,
-													set = function()
-														SetCVar("nameplateShowFriendlyTotems", abs(GetCVar("nameplateShowFriendlyTotems") - 1))
-													end
-												},
-												nameplateShowFriendlyPets = {
-													name = L["Show Friendly Pets"],
-													type = "toggle",
-													order = 3,
-													get = function()
-														return (GetCVar("nameplateShowFriendlyPets") == "1")
-													end,
-													set = function()
-														SetCVar("nameplateShowFriendlyPets", abs(GetCVar("nameplateShowFriendlyPets") - 1))
-													end
-												},
-												nameplateShowFriendlyGuardians = {
-													name = L["Show Friendly Guardians"],
-													type = "toggle",
-													order = 4,
-													get = function()
-														return (GetCVar("nameplateShowFriendlyGuardians") == "1")
-													end,
-													set = function()
-														SetCVar("nameplateShowFriendlyGuardians", abs(GetCVar("nameplateShowFriendlyGuardians") - 1))
-													end
-												}
-											}
-										},
 										Enemy = {
 											type = "group",
 											name = L["Enemy"],
@@ -722,17 +695,6 @@ local function GetOptions()
 													end,
 													set = function()
 														SetCVar("nameplateShowEnemies", abs(GetCVar("nameplateShowEnemies") - 1))
-													end
-												},
-												nameplateShowEnemyTotems = {
-													name = L["Show Enemy Totems"],
-													type = "toggle",
-													order = 2,
-													get = function()
-														return (GetCVar("nameplateShowEnemyTotems") == "1")
-													end,
-													set = function()
-														SetCVar("nameplateShowEnemyTotems", abs(GetCVar("nameplateShowEnemyTotems") - 1))
 													end
 												},
 												nameplateShowEnemyPets = {
@@ -875,70 +837,12 @@ local function GetOptions()
 								}
 							}
 						},
-						FriendlyPlayers = {
-							name = "Friendly Nameplates",
+						Totems = {
+							name = L["Totem Nameplates"],
 							type = "group",
-							order = 14,
-							args = {
-								Players = {
-									name = "Friendly players",
-									type = "group",
-									inline = true,
-									order = 1,
-									args = {
-										Mode = {
-											name = "Show as",
-											type = "select",
-											order = 1,
-											width = "double",
-											values = {
-												bar = "Health bar",
-												name = "Name only (health bar while damaged)"
-											},
-											get = function()
-												return db.friendlyPlayerMode or "bar"
-											end,
-											set = function(info, val)
-												db.friendlyPlayerMode = val
-												Update()
-											end
-										},
-										Color = {
-											name = "Color",
-											type = "color",
-											order = 2,
-											desc = "Health bar and name color of friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
-											get = GetColor,
-											set = SetColor,
-											arg = {"fPlayerHPbarColor"}
-										},
-										Note = {
-											type = "description",
-											order = 3,
-											name = "With 'Name only' a friendly player shows just the name; when they take damage the health bar appears until they are back at full health. Class colors are not used: on Grimfall (custom classes, classless realm) they would not mean anything."
-										}
-									}
-								},
-								NPCs = {
-									name = "Friendly NPCs",
-									type = "group",
-									inline = true,
-									order = 2,
-									args = {
-										NameOnly = {
-											name = "Name only",
-											type = "toggle",
-											order = 1,
-											width = "double",
-											desc = "Friendly NPCs (guards, vendors, quest givers...) show only their name, without a health bar.",
-											descStyle = "inline",
-											get = GetValue,
-											set = SetValue,
-											arg = {"friendlyNameOnly"}
-										}
-									}
-								}
-							}
+							childGroups = "list",
+							order = 140,
+							args = {}
 						},
 						HealthBarTexture = {
 							name = L["Healthbar"],
@@ -1185,7 +1089,7 @@ local function GetOptions()
 														FriendlyColor = {
 															name = L["Friendly Color"],
 															type = "color",
-															desc = "Friendly NPCs (friendly players: Nameplate Settings -> Friendly Nameplates).",
+															desc = "Friendly NPCs (friendly players: Friendly tab).",
 															get = GetColor,
 															set = SetColor,
 															arg = {"fHPbarColor"}
@@ -3615,32 +3519,99 @@ local function GetOptions()
 					}
 				},
 				-- Friendly targets (group members' nameplates)
-				FriendlyTargets = {
-					name = "Friendly Targets",
+				Friendly = {
+					name = "Friendly",
 					type = "group",
 					order = 35,
 					args = {
 						Info = {
 							type = "description",
-							order = 1,
+							order = 0,
 							fontSize = "medium",
-							name = "Effects on the nameplates of |cff40FF40friendly players in your party / raid|r. Friendly nameplates must be shown in the game (key |cff89F559Shift+V|r, or the switch below).\n"
+							name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, and effects on your party / raid members.\n"
 						},
-						ShowFriendly = {
+						Show = {
+							type = "group",
 							name = "Show friendly nameplates",
-							type = "toggle",
+							order = 1,
+							inline = true,
+							args = {
+								nameplateShowFriends = {
+									name = "Players (Shift+V)",
+									type = "toggle",
+									order = 1,
+									get = function()
+										return (GetCVar("nameplateShowFriends") == "1")
+									end,
+									set = function()
+										SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
+									end
+								},
+								nameplateShowFriendlyPets = {
+									name = "Pets",
+									type = "toggle",
+									order = 3,
+									get = function()
+										return (GetCVar("nameplateShowFriendlyPets") == "1")
+									end,
+									set = function()
+										SetCVar("nameplateShowFriendlyPets", abs(GetCVar("nameplateShowFriendlyPets") - 1))
+									end
+								},
+								nameplateShowFriendlyGuardians = {
+									name = "Guardians",
+									type = "toggle",
+									order = 4,
+									get = function()
+										return (GetCVar("nameplateShowFriendlyGuardians") == "1")
+									end,
+									set = function()
+										SetCVar("nameplateShowFriendlyGuardians", abs(GetCVar("nameplateShowFriendlyGuardians") - 1))
+									end
+								}
+							}
+						},
+						Players = {
+							name = "Friendly players",
+							type = "group",
+							inline = true,
 							order = 2,
-							width = "double",
-							desc = "Same as Shift+V in the game.",
-							get = function()
-								return GetCVar("nameplateShowFriends") == "1"
-							end,
-							set = function(info, val)
-								SetCVar("nameplateShowFriends", val and 1 or 0)
-							end
+							args = {
+								Mode = {
+									name = "Show as",
+									type = "select",
+									order = 1,
+									width = "double",
+									values = {
+										bar = "Health bar",
+										name = "Name only (health bar while damaged)"
+									},
+									get = function()
+										return db.friendlyPlayerMode or "bar"
+									end,
+									set = function(info, val)
+										db.friendlyPlayerMode = val
+										Update()
+									end
+								},
+								Color = {
+									name = "Color",
+									type = "color",
+									order = 2,
+									desc = "Health bar and name color of friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
+									get = GetColor,
+									set = SetColor,
+									arg = {"fPlayerHPbarColor"}
+								},
+								Note = {
+									type = "description",
+									order = 3,
+									name = "With 'Name only' a friendly player shows just the name; when they take damage the health bar appears until they are back at full health. Class colors are not used: on Grimfall (custom classes, classless realm) they would not mean anything."
+								}
+							}
 						},
 						Effects = {
-							name = "Effects",
+							name = "Group members (party / raid)",
 							type = "group",
 							inline = true,
 							order = 3,
@@ -3715,10 +3686,29 @@ local function GetOptions()
 								}
 							}
 						},
+						NPCs = {
+							name = "Friendly NPCs",
+							type = "group",
+							inline = true,
+							order = 4,
+							args = {
+								NameOnly = {
+									name = "Name only",
+									type = "toggle",
+									order = 1,
+									width = "double",
+									desc = "Friendly NPCs (guards, vendors, quest givers...) show only their name, without a health bar.",
+									descStyle = "inline",
+									get = GetValue,
+									set = SetValue,
+									arg = {"friendlyNameOnly"}
+								}
+							}
+						},
 						Note = {
 							type = "description",
-							order = 4,
-							name = "\nIcon size and position are the same as for enemies: |cff89F559Widgets -> Debuffs|r."
+							order = 5,
+							name = "\nIcon size and position of the group member effects are the same as for enemies: |cff89F559Widgets -> Debuffs|r."
 						}
 					}
 				},
@@ -4228,13 +4218,6 @@ local function GetOptions()
 						}
 					}
 				},
-				Totems = {
-					name = L["Totem Nameplates"],
-					type = "group",
-					childGroups = "list",
-					order = 50,
-					args = {}
-				},
 				Custom = {
 					name = L["Custom Nameplates"],
 					type = "group",
@@ -4563,7 +4546,7 @@ local function GetOptions()
 							get = GetValue,
 							set = function(info, val)
 								SetValue(info, val)
-								options.args.Totems.args[totemName].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2]
+								options.args.NameplateSettings.args.Totems.args[totemName].args.Textures.args.Icon.image = "Interface\\Addons\\TidyPlates_ThreatPlates\\Widgets\\TotemIconWidget\\" .. db.totemSettings[totemID[k_c][2]][7] .. "\\" .. totemID[k_c][2]
 							end,
 							values = {normal = "Normal", special = "Special"},
 							arg = {"totemSettings", totemID[k_c][2], 7}
@@ -4574,7 +4557,7 @@ local function GetOptions()
 		}
 		TotemOpts_OrderCnt = TotemOpts_OrderCnt + 10
 	end
-	options.args.Totems.args = TotemOpts
+	options.args.NameplateSettings.args.Totems.args = TotemOpts
 	local CustomOpts_OrderCnt = 30
 	local CustomOpts = {
 		GeneralSettings = {
@@ -5106,8 +5089,6 @@ function TidyPlatesThreat:SetUpOptions()
 	UpdateSpecial()
 
 
-	options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	options.args.profiles.order = 10000
 
 	LibStub("AceConfig-3.0"):RegisterOptionsTable("Tidy Plates: Threat Plates", options)
 	LibStub("AceConfigDialog-3.0"):SetDefaultSize("Tidy Plates: Threat Plates", 750, 600)
