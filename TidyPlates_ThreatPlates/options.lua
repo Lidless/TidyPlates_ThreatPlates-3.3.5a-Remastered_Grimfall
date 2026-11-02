@@ -529,7 +529,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Enemies|r (Widgets -> Debuffs): by default your own DoTs / debuffs are shown above the nameplate with the time left, plus crowd control (stun, fear, polymorph...) from anyone, marked with a glow. The mode can be changed (all debuffs, white / black list...).\n\n|cff89F559Friendly players|r (Friendly tab): your HoTs and short buffs, and crowd control on party / raid members. Friendly nameplates must be shown (Shift+V).\n\nLimit of the 3.3.5 client: exact durations are known for your target, focus, mouseover and group members; on other mobs the effects come from the combat log."
+									name = "|cff89F559Enemies|r (Widgets -> Debuffs): by default your own DoTs / debuffs are shown above the nameplate with the time left, plus crowd control (stun, fear, polymorph...) from anyone, marked with a glow. The mode can be changed (all debuffs, white / black list...).\n\n|cff89F559Friendly players|r (Nameplate Settings -> Friendly): your HoTs and short buffs, and crowd control on party / raid members. Friendly nameplates must be shown (Shift+V).\n\nLimit of the 3.3.5 client: exact durations are known for your target, focus, mouseover and group members; on other mobs the effects come from the combat log."
 								}
 							}
 						},
@@ -543,7 +543,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Friendly|r tab: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Friendly|r tab: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -571,7 +571,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight), Totem Nameplates.\n|cff89F559Friendly|r - which friendly nameplates are shown, players (bar or name only, color), NPCs (name only), HoTs and crowd control on group members.\n|cff89F559Reset|r - the button below puts all settings back to the defaults."
+									name = "|cff89F559Threat System|r\n  - Enable Threat System: master switch of all threat warnings.\n  - General Settings: which mob types (normal, elite, boss, neutral) get warnings; ignore mobs that are not in combat.\n  - Alpha: how transparent a nameplate is at low / medium / high threat (separately for Tank and DPS/Healer).\n  - Scale: how big a nameplate is at low / medium / high threat. Bigger = more visible.\n  - Coloring: health bar colors at each threat level. A fully transparent color means 'keep the normal color'.\n  - Textures: the glowing frame around warned nameplates (Default or Bar style).\n  Note: in the Tank columns 'Low threat' is the bad state (mob not on you); in the DPS/Healing columns 'High threat' is the bad state (mob on you).\n\n|cff89F559Widgets|r - extra icons and texts on the nameplates (Mob Target line, debuffs, target highlight, threat line, etc.).\n|cff89F559Nameplate Settings|r - size, fonts, textures and colors of the nameplates themselves; Enemy Nameplates (execute line, cast highlight), Totem Nameplates, and Friendly: which friendly nameplates are shown, players (bar or name only, color), NPCs (name only), HoTs and crowd control on group members.\n|cff89F559Reset|r - the button below puts all settings back to the defaults."
 								}
 							}
 						},
@@ -822,6 +822,199 @@ local function GetOptions()
 											end
 										}
 									}
+								}
+							}
+						},
+						Friendly = {
+							name = "Friendly",
+							type = "group",
+							order = 14,
+							args = {
+								Info = {
+									type = "description",
+									order = 0,
+									fontSize = "medium",
+									name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, and effects on your party / raid members.\n"
+								},
+								Show = {
+									type = "group",
+									name = "Show friendly nameplates",
+									order = 1,
+									inline = true,
+									args = {
+										nameplateShowFriends = {
+											name = "Players (Shift+V)",
+											type = "toggle",
+											order = 1,
+											get = function()
+												return (GetCVar("nameplateShowFriends") == "1")
+											end,
+											set = function()
+												SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
+											end
+										},
+										nameplateShowFriendlyPets = {
+											name = "Pets",
+											type = "toggle",
+											order = 3,
+											get = function()
+												return (GetCVar("nameplateShowFriendlyPets") == "1")
+											end,
+											set = function()
+												SetCVar("nameplateShowFriendlyPets", abs(GetCVar("nameplateShowFriendlyPets") - 1))
+											end
+										},
+										nameplateShowFriendlyGuardians = {
+											name = "Guardians",
+											type = "toggle",
+											order = 4,
+											get = function()
+												return (GetCVar("nameplateShowFriendlyGuardians") == "1")
+											end,
+											set = function()
+												SetCVar("nameplateShowFriendlyGuardians", abs(GetCVar("nameplateShowFriendlyGuardians") - 1))
+											end
+										}
+									}
+								},
+								Players = {
+									name = "Friendly players",
+									type = "group",
+									inline = true,
+									order = 2,
+									args = {
+										Mode = {
+											name = "Show as",
+											type = "select",
+											order = 1,
+											width = "double",
+											values = {
+												bar = "Health bar",
+												name = "Name only (health bar while damaged)"
+											},
+											get = function()
+												return db.friendlyPlayerMode or "bar"
+											end,
+											set = function(info, val)
+												db.friendlyPlayerMode = val
+												Update()
+											end
+										},
+										Color = {
+											name = "Color",
+											type = "color",
+											order = 2,
+											desc = "Health bar and name color of friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
+											get = GetColor,
+											set = SetColor,
+											arg = {"fPlayerHPbarColor"}
+										},
+										Note = {
+											type = "description",
+											order = 3,
+											name = "With 'Name only' a friendly player shows just the name; when they take damage the health bar appears until they are back at full health. Class colors are not used: on Grimfall (custom classes, classless realm) they would not mean anything."
+										}
+									}
+								},
+								Effects = {
+									name = "Group members (party / raid)",
+									type = "group",
+									inline = true,
+									order = 3,
+									args = {
+										Buffs = {
+											name = "My HoTs and short buffs",
+											type = "toggle",
+											order = 1,
+											width = "double",
+											desc = "Your heal over time effects, shields and other short buffs on group members, with the time left.",
+											descStyle = "inline",
+											get = function()
+												return db.friendlyAuras.buffs
+											end,
+											set = function(info, val)
+												db.friendlyAuras.buffs = val
+												Update()
+											end
+										},
+										MaxDuration = {
+											name = "Longest buff to show (seconds)",
+											type = "range",
+											order = 2,
+											width = "double",
+											min = 10,
+											max = 600,
+											step = 5,
+											desc = "Buffs longer than this (e.g. 30 minute or 1 hour buffs) are not shown, so only HoTs and short effects remain.",
+											disabled = function()
+												return not db.friendlyAuras.buffs
+											end,
+											get = function()
+												return db.friendlyAuras.maxDuration
+											end,
+											set = function(info, val)
+												db.friendlyAuras.maxDuration = val
+												Update()
+											end
+										},
+										Dispel = {
+											name = "I can remove (these CC icons blink)",
+											type = "multiselect",
+											order = 4,
+											width = "double",
+											values = {Magic = "Magic", Curse = "Curse", Poison = "Poison", Disease = "Disease"},
+											disabled = function()
+												return not db.friendlyAuras.cc
+											end,
+											get = function(info, key)
+												return db.friendlyAuras.dispel and db.friendlyAuras.dispel[key]
+											end,
+											set = function(info, key, val)
+												db.friendlyAuras.dispel = db.friendlyAuras.dispel or {}
+												db.friendlyAuras.dispel[key] = val
+												Update()
+											end
+										},
+										CC = {
+											name = "Crowd control on group members",
+											type = "toggle",
+											order = 3,
+											width = "double",
+											desc = "Stun, fear, polymorph, root, silence... on a group member, shown with a glow.",
+											descStyle = "inline",
+											get = function()
+												return db.friendlyAuras.cc
+											end,
+											set = function(info, val)
+												db.friendlyAuras.cc = val
+												Update()
+											end
+										}
+									}
+								},
+								NPCs = {
+									name = "Friendly NPCs",
+									type = "group",
+									inline = true,
+									order = 4,
+									args = {
+										NameOnly = {
+											name = "Name only",
+											type = "toggle",
+											order = 1,
+											width = "double",
+											desc = "Friendly NPCs (guards, vendors, quest givers...) show only their name, without a health bar.",
+											descStyle = "inline",
+											get = GetValue,
+											set = SetValue,
+											arg = {"friendlyNameOnly"}
+										}
+									}
+								},
+								Note = {
+									type = "description",
+									order = 5,
+									name = "\nIcon size and position of the group member effects are the same as for enemies: |cff89F559Widgets -> Debuffs|r."
 								}
 							}
 						},
@@ -1077,7 +1270,7 @@ local function GetOptions()
 														FriendlyColor = {
 															name = L["Friendly Color"],
 															type = "color",
-															desc = "Friendly NPCs (friendly players: Friendly tab).",
+															desc = "Friendly NPCs (friendly players: Nameplate Settings -> Friendly).",
 															get = GetColor,
 															set = SetColor,
 															arg = {"fHPbarColor"}
@@ -3507,199 +3700,6 @@ local function GetOptions()
 					}
 				},
 				-- Friendly targets (group members' nameplates)
-				Friendly = {
-					name = "Friendly",
-					type = "group",
-					order = 35,
-					args = {
-						Info = {
-							type = "description",
-							order = 0,
-							fontSize = "medium",
-							name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, and effects on your party / raid members.\n"
-						},
-						Show = {
-							type = "group",
-							name = "Show friendly nameplates",
-							order = 1,
-							inline = true,
-							args = {
-								nameplateShowFriends = {
-									name = "Players (Shift+V)",
-									type = "toggle",
-									order = 1,
-									get = function()
-										return (GetCVar("nameplateShowFriends") == "1")
-									end,
-									set = function()
-										SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
-									end
-								},
-								nameplateShowFriendlyPets = {
-									name = "Pets",
-									type = "toggle",
-									order = 3,
-									get = function()
-										return (GetCVar("nameplateShowFriendlyPets") == "1")
-									end,
-									set = function()
-										SetCVar("nameplateShowFriendlyPets", abs(GetCVar("nameplateShowFriendlyPets") - 1))
-									end
-								},
-								nameplateShowFriendlyGuardians = {
-									name = "Guardians",
-									type = "toggle",
-									order = 4,
-									get = function()
-										return (GetCVar("nameplateShowFriendlyGuardians") == "1")
-									end,
-									set = function()
-										SetCVar("nameplateShowFriendlyGuardians", abs(GetCVar("nameplateShowFriendlyGuardians") - 1))
-									end
-								}
-							}
-						},
-						Players = {
-							name = "Friendly players",
-							type = "group",
-							inline = true,
-							order = 2,
-							args = {
-								Mode = {
-									name = "Show as",
-									type = "select",
-									order = 1,
-									width = "double",
-									values = {
-										bar = "Health bar",
-										name = "Name only (health bar while damaged)"
-									},
-									get = function()
-										return db.friendlyPlayerMode or "bar"
-									end,
-									set = function(info, val)
-										db.friendlyPlayerMode = val
-										Update()
-									end
-								},
-								Color = {
-									name = "Color",
-									type = "color",
-									order = 2,
-									desc = "Health bar and name color of friendly players (light blue by default), so they stand out from friendly NPCs in cities.",
-									get = GetColor,
-									set = SetColor,
-									arg = {"fPlayerHPbarColor"}
-								},
-								Note = {
-									type = "description",
-									order = 3,
-									name = "With 'Name only' a friendly player shows just the name; when they take damage the health bar appears until they are back at full health. Class colors are not used: on Grimfall (custom classes, classless realm) they would not mean anything."
-								}
-							}
-						},
-						Effects = {
-							name = "Group members (party / raid)",
-							type = "group",
-							inline = true,
-							order = 3,
-							args = {
-								Buffs = {
-									name = "My HoTs and short buffs",
-									type = "toggle",
-									order = 1,
-									width = "double",
-									desc = "Your heal over time effects, shields and other short buffs on group members, with the time left.",
-									descStyle = "inline",
-									get = function()
-										return db.friendlyAuras.buffs
-									end,
-									set = function(info, val)
-										db.friendlyAuras.buffs = val
-										Update()
-									end
-								},
-								MaxDuration = {
-									name = "Longest buff to show (seconds)",
-									type = "range",
-									order = 2,
-									width = "double",
-									min = 10,
-									max = 600,
-									step = 5,
-									desc = "Buffs longer than this (e.g. 30 minute or 1 hour buffs) are not shown, so only HoTs and short effects remain.",
-									disabled = function()
-										return not db.friendlyAuras.buffs
-									end,
-									get = function()
-										return db.friendlyAuras.maxDuration
-									end,
-									set = function(info, val)
-										db.friendlyAuras.maxDuration = val
-										Update()
-									end
-								},
-								Dispel = {
-									name = "I can remove (these CC icons blink)",
-									type = "multiselect",
-									order = 4,
-									width = "double",
-									values = {Magic = "Magic", Curse = "Curse", Poison = "Poison", Disease = "Disease"},
-									disabled = function()
-										return not db.friendlyAuras.cc
-									end,
-									get = function(info, key)
-										return db.friendlyAuras.dispel and db.friendlyAuras.dispel[key]
-									end,
-									set = function(info, key, val)
-										db.friendlyAuras.dispel = db.friendlyAuras.dispel or {}
-										db.friendlyAuras.dispel[key] = val
-										Update()
-									end
-								},
-								CC = {
-									name = "Crowd control on group members",
-									type = "toggle",
-									order = 3,
-									width = "double",
-									desc = "Stun, fear, polymorph, root, silence... on a group member, shown with a glow.",
-									descStyle = "inline",
-									get = function()
-										return db.friendlyAuras.cc
-									end,
-									set = function(info, val)
-										db.friendlyAuras.cc = val
-										Update()
-									end
-								}
-							}
-						},
-						NPCs = {
-							name = "Friendly NPCs",
-							type = "group",
-							inline = true,
-							order = 4,
-							args = {
-								NameOnly = {
-									name = "Name only",
-									type = "toggle",
-									order = 1,
-									width = "double",
-									desc = "Friendly NPCs (guards, vendors, quest givers...) show only their name, without a health bar.",
-									descStyle = "inline",
-									get = GetValue,
-									set = SetValue,
-									arg = {"friendlyNameOnly"}
-								}
-							}
-						},
-						Note = {
-							type = "description",
-							order = 5,
-							name = "\nIcon size and position of the group member effects are the same as for enemies: |cff89F559Widgets -> Debuffs|r."
-						}
-					}
-				},
 				Widgets = {
 					name = L["Widgets"],
 					type = "group",

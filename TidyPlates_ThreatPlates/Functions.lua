@@ -245,17 +245,24 @@ do
 					return unit.red, unit.green, unit.blue
 				end
 			end
-		elseif (((style == "tank") or (style == "dps")) and db.threat.useHPColor and InCombatLockdown()) then
+		end
+
+		-- threat color in combat; a fully transparent threat color means "keep the normal color"
+		-- (the normal coloring below: custom / friendly player / HP colors), not the plain game color
+		local threatColor
+		if ((style == "tank") or (style == "dps")) and db.threat.useHPColor and InCombatLockdown() then
+			local T = db.settings[style].threatcolor[EffectiveThreat(unit, style)]
+			if T and T.a ~= 0 then
+				threatColor = T
+			end
+		end
+
+		if threatColor then
 			if db.settings.raidicon.hpColor and unit.isMarked and not custom then
 				local R = db.settings.raidicon.hpMarked[unit.raidIcon]
 				return R.r, R.g, R.b
 			else
-				local T = db.settings[style].threatcolor[EffectiveThreat(unit, style)]
-				if T.a == 0 then
-					-- fully transparent threat color = keep the normal nameplate color
-					return unit.red, unit.green, unit.blue
-				end
-				return T.r, T.g, T.b
+				return threatColor.r, threatColor.g, threatColor.b
 			end
 		else
 			if db.settings.raidicon.hpColor and unit.isMarked and not custom then
