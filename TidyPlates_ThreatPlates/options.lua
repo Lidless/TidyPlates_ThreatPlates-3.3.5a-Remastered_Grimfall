@@ -4201,7 +4201,7 @@ local function GetOptions()
 									type = "description",
 									order = 0,
 									fontSize = "medium",
-									name = "Your threat as a number above the right end of the health bar, in combat. The game gives threat numbers only for your |cffffd100target|r, the mob under your |cffffd100mouse|r and your |cffffd100focus|r, so only these show it.\n|cffFFA61ADPS|r / |cffFF3333Healer|r: how close you are to pulling aggro; 100% = you pull (white, orange from 70%, red from 90% or when the mob is on you).\n|cff40FF40Tank|r: your own threat. White 100% = the mob is on you. Below 100% someone else has it: orange from 90% (you take it back soon), yellow from 70%, red below.\n"
+									name = "Your threat as a number up and to the right of the health bar, in combat. The game gives threat numbers only for your |cffffd100target|r, the mob under your |cffffd100mouse|r and your |cffffd100focus|r, so only these show it.\n|cffFFA61ADPS|r / |cffFF3333Healer|r: how close you are to pulling aggro; 100% = you pull (white, orange from 70%, red from 90% or when the mob is on you).\n|cff40FF40Tank|r: your own threat. White 100% = the mob is on you. Below 100% someone else has it: orange from 90% (you take it back soon), yellow from 70%, red below.\n"
 								},
 								Toggle = {
 									name = L["Enable"],

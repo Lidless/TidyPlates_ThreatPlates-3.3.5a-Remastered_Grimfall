@@ -521,8 +521,8 @@ local function GetDecor(ext)
 	tp:SetHeight(14)
 	tp:SetFrameLevel(ext:GetFrameLevel() + 6)
 	local tpt = tp:CreateFontString(nil, "OVERLAY")
-	tpt:SetPoint("BOTTOMRIGHT", tp, "BOTTOMRIGHT", 0, 0)
-	tpt:SetJustifyH("RIGHT")
+	tpt:SetPoint("BOTTOMLEFT", tp, "BOTTOMLEFT", 0, 0)
+	tpt:SetJustifyH("LEFT")
 	tp.text = tpt
 	tp.hb = bars and bars.healthbar
 	tp:Hide()
@@ -642,9 +642,10 @@ local function UpdatePlates(elapsed)
 				end
 				tp:ClearAllPoints()
 				if tp.hb then
-					tp:SetPoint("BOTTOMRIGHT", tp.hb, "TOPRIGHT", tpc.x or 0, tpc.y or 2)
+					-- up and to the right of the health bar, clear of the name and the level
+					tp:SetPoint("BOTTOMLEFT", tp.hb, "TOPRIGHT", tpc.x or 2, tpc.y or 16)
 				else
-					tp:SetPoint("BOTTOM", ext, "TOP", tpc.x or 0, tpc.y or 2)
+					tp:SetPoint("BOTTOM", ext, "TOP", tpc.x or 2, tpc.y or 16)
 				end
 				tp.text:SetText(ttext)
 				tp.text:SetTextColor(tr, tg, tb)
