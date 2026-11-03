@@ -140,7 +140,7 @@ number above the health bar (on a dark background, readable on any ground), in c
   | Ctrl+V | everything off / on |
 
   The game has one switch for friendly players and NPCs; it stays on while either is wanted, and the other kind is
-  hidden by the addon. All four keys are Threat Plates key bindings (the client's own V / Shift+V also hid other
+  shown as name only by the addon (no health bar, the name stays). All four keys are Threat Plates key bindings (the client's own V / Shift+V also hid other
   things); they are assigned once per character, a key that was used for something else is reported in chat.
 - **Overlapping** nameplates on / off in the menu (Nameplate Settings → General Settings → Blizzard Settings), same as
   `/tptpol`.

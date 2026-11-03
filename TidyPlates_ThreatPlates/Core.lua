@@ -579,11 +579,12 @@ function TidyPlatesThreat.SetStyle(unit)
 			end
 		elseif unit.reaction == "FRIENDLY" then
 			-- Shift+V (friendly players) and Alt+V (friendly NPCs) are separate; the game has only
-			-- one switch for both, so the one that is off is hidden here
+			-- one switch for both, so the one that is off is shown as name only here (hiding the
+			-- whole plate would hide the name too: the game shows no own name over a plate)
 			if unit.type == "PLAYER" and TidyPlatesThreat.friendlyPlayers == false then
-				return "empty"
+				return "text"
 			elseif unit.type ~= "PLAYER" and TidyPlatesThreat.friendlyNPCs == false then
-				return "empty"
+				return "text"
 			elseif DB.friendlyNameOnly and unit.type ~= "PLAYER" then
 				-- friendly NPCs: name only
 				return "text"

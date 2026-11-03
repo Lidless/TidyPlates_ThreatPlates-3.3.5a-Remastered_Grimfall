@@ -4902,7 +4902,7 @@ local GROUP_HELP = {
 	["NameplateSettings.SkullIcon"] = "Skull icon on bosses and mobs far above your level.",
 	["NameplateSettings.SpellIcon"] = "Icon of the spell being cast, next to the castbar.",
 	["NameplateSettings.Raidmarks"] = "Raid target mark (skull, cross, star...) on the nameplate.",
-	["NameplateSettings.Friendly.Show"] = "Keys: |cffffd100V|r enemy nameplates, |cffffd100Shift+V|r friendly players, |cffffd100Alt+V|r friendly NPCs, |cffffd100Ctrl+V|r everything off / on. Remembered per character. The keys can be changed in the game's Key Bindings (Threat Plates).",
+	["NameplateSettings.Friendly.Show"] = "Keys: |cffffd100V|r enemy nameplates, |cffffd100Shift+V|r friendly players, |cffffd100Alt+V|r friendly NPCs, |cffffd100Ctrl+V|r everything off / on. Friendly players / NPCs switched off keep their name, only the health bar goes. Remembered per character. The keys can be changed in the game's Key Bindings (Threat Plates).",
 	["NameplateSettings.Totems"] = "Nameplates of shaman totems: each totem can get its own icon and health bar color, or be hidden.",
 	["NameplateSettings.Totems.TotemSettings.Toggles"] = "|cffffd100Hide Healthbars|r: show only the totem icon, without a health bar.",
 	-- Threat System
