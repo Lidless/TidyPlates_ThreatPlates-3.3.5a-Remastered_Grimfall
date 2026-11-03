@@ -683,6 +683,11 @@ local function EventHandler(self, event, ...)
 		end
 		SetCVar("nameplateShowEnemies", CharDB.showEnemies and 1 or 0)
 		SetCVar("nameplateShowFriends", CharDB.showFriends and 1 or 0)
+		-- the key bindings toggle by these globals: keep them in step, so the first V / Shift+V
+		-- press does what you expect
+		NAMEPLATES_ON = CharDB.showEnemies and true or nil
+		FRIENDNAMEPLATES_ON = CharDB.showFriends and true or nil
+		TidyPlatesThreat.friendNameplatesWanted = CharDB.showFriends
 
 		if CharDB.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) and DB.verbose then
 			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. "FFFFFF" .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())
@@ -722,3 +727,32 @@ f:RegisterEvent("PLAYER_REGEN_DISABLED")
 f:RegisterEvent("PLAYER_REGEN_ENABLED")
 f:RegisterEvent("RAID_TARGET_UPDATE")
 f:SetScript("OnEvent", EventHandler)
+
+-----------------------------------------------------------------------------
+-- V only toggles enemy nameplates
+-- The game's V hides ALL nameplates (friendly too) but shows only the enemy ones again.
+-- We remember whether friendly nameplates are wanted (Shift+V, the menu) and restore them
+-- after V, so V never touches the friendly ones.
+-----------------------------------------------------------------------------
+local function RestoreFriendly()
+	if TidyPlatesThreat.friendNameplatesWanted ~= nil then
+		SetCVar("nameplateShowFriends", TidyPlatesThreat.friendNameplatesWanted and 1 or 0)
+		FRIENDNAMEPLATES_ON = TidyPlatesThreat.friendNameplatesWanted and true or nil
+	end
+end
+if type(HideNameplates) == "function" then
+	hooksecurefunc("HideNameplates", RestoreFriendly)
+end
+if type(ShowNameplates) == "function" then
+	hooksecurefunc("ShowNameplates", RestoreFriendly)
+end
+if type(ShowFriendNameplates) == "function" then
+	hooksecurefunc("ShowFriendNameplates", function()
+		TidyPlatesThreat.friendNameplatesWanted = true
+	end)
+end
+if type(HideFriendNameplates) == "function" then
+	hooksecurefunc("HideFriendNameplates", function()
+		TidyPlatesThreat.friendNameplatesWanted = false
+	end)
+end

@@ -131,6 +131,10 @@ number above the health bar (on a dark background, readable on any ground), in c
 - **Nameplates on by default, remembered per character**: on a character's first login both enemy and friendly
   nameplates are turned on; after that the state the character had at logout (V / Shift+V) is restored at the next
   login (the game itself keeps one setting for all characters).
+- **V toggles only the enemy nameplates**: the game's V also hid the friendly ones and did not bring them back; the
+  friendly state (Shift+V) is now kept.
+- **Overlapping** nameplates on / off in the menu (Nameplate Settings → General Settings → Blizzard Settings), same as
+  `/tptpol`.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - Short **help texts** at the top of the option groups and next to settings whose purpose is not obvious (e.g. the
   Threat System settings only override the Nameplate Settings in combat).

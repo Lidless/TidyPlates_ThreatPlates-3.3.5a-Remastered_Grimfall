@@ -668,6 +668,20 @@ local function GetOptions()
 												LibStub("AceConfigDialog-3.0"):Close("Tidy Plates: Threat Plates")
 											end
 										},
+										Overlap = {
+											name = "Nameplates may overlap",
+											type = "toggle",
+											order = 1.5,
+											width = "double",
+											desc = "On: nameplates stay above their units and may cover each other. Off: the game spreads them apart so none is covered (they may move away from their units in a crowd). Same as /tptpol.",
+											descStyle = "inline",
+											get = function()
+												return GetCVar("nameplateAllowOverlap") == "1"
+											end,
+											set = function(info, val)
+												SetCVar("nameplateAllowOverlap", val and 1 or 0)
+											end
+										},
 										Enemy = {
 											type = "group",
 											name = L["Enemy"],
@@ -1002,6 +1016,8 @@ local function GetOptions()
 											end,
 											set = function()
 												SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
+												TidyPlatesThreat.friendNameplatesWanted = (GetCVar("nameplateShowFriends") == "1")
+												FRIENDNAMEPLATES_ON = TidyPlatesThreat.friendNameplatesWanted and true or nil
 											end
 										},
 										nameplateShowFriendlyPets = {
