@@ -114,7 +114,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 
 #### Threat %
 `/tptp` → Widgets → *Threat %* (on by default; replaces the old, hard to read *Threat Line* widget): your threat as a
-number above the health bar, in combat. The game gives threat numbers only for your target, mouseover and focus.
+number above the health bar (on a dark background, readable on any ground), in combat. The game gives threat numbers only for your target, mouseover and focus.
 - DPS / Healer: how close you are to pulling aggro (100% = you pull); white, orange from 70%, red from 90% or with aggro.
 - Tank: your own threat. White 100% = the mob is on you; below 100% someone else has it: orange from 90% (you take
   it back soon), yellow from 70%, red below.

@@ -520,6 +520,12 @@ local function GetDecor(ext)
 	tpt:SetPoint("BOTTOMLEFT", tp, "BOTTOMLEFT", 0, 0)
 	tpt:SetJustifyH("LEFT")
 	tp.text = tpt
+	-- dark box behind the number, so it can be read on any ground; follows the text size
+	local tbg = tp:CreateTexture(nil, "BACKGROUND")
+	tbg:SetTexture(0, 0, 0, 0.7)
+	tbg:SetPoint("TOPLEFT", tpt, "TOPLEFT", -3, 2)
+	tbg:SetPoint("BOTTOMRIGHT", tpt, "BOTTOMRIGHT", 3, -2)
+	tp.bg = tbg
 	tp.hb = bars and bars.healthbar
 	tp:Hide()
 	d.threatPct = tp
@@ -645,6 +651,11 @@ local function UpdatePlates(elapsed)
 				end
 				tp.text:SetText(ttext)
 				tp.text:SetTextColor(tr, tg, tb)
+				if tpc.background == false then
+					tp.bg:Hide()
+				else
+					tp.bg:Show()
+				end
 				tp:Show()
 			else
 				d.threatPct.mob, d.threatPct.band, d.threatPct.blinkUntil = nil, nil, nil

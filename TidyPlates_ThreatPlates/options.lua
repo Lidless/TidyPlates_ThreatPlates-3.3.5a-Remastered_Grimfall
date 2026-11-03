@@ -4274,6 +4274,23 @@ local function GetOptions()
 										db.threatPercent.ON = val
 									end
 								},
+								Background = {
+									name = "Dark background",
+									type = "toggle",
+									order = 1.1,
+									width = "double",
+									desc = "A dark box behind the number, so it can be read on any ground.",
+									descStyle = "inline",
+									disabled = function()
+										return not db.threatPercent.ON
+									end,
+									get = function()
+										return db.threatPercent.background ~= false
+									end,
+									set = function(info, val)
+										db.threatPercent.background = val
+									end
+								},
 								Blink = {
 									name = "Blink on level change",
 									type = "toggle",

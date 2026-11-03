@@ -179,7 +179,7 @@ function TidyPlatesThreat:OnInitialize()
 				size = 11,
 				anchor = "CENTER"
 			},
-			threatPercent = {ON = true, size = 11, x = 2, y = 16, blink = true, sound = true},
+			threatPercent = {ON = true, size = 11, x = 2, y = 16, blink = true, sound = true, background = true},
 			tankedWidget = {
 				ON = false,
 				scale = 16,
