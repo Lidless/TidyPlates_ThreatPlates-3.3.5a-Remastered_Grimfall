@@ -10,8 +10,10 @@ local function UpdateTargetFrameArt(frame, unit)
 	db = TidyPlatesThreat.db.profile
 
 	local t = db.targetWidget
-	if t.ON and UnitExists("target") and unit.isTarget and TidyPlatesThreat.SetStyle(unit) ~= "etotem" then
-		if db.friendlyNameOnly and unit.reaction == "FRIENDLY" then
+	local style = TidyPlatesThreat.SetStyle(unit)
+	if t.ON and UnitExists("target") and unit.isTarget and style ~= "etotem" then
+		-- no target art around name-only (or hidden) nameplates
+		if style == "text" or style == "empty" then
 			frame.IconLeft:Hide()
 			frame.IconRight:Hide()
 		else

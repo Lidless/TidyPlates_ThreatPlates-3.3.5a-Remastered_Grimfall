@@ -7,7 +7,9 @@ local DB
 local function UpdateEliteFrameArtOverlay(frame, unit)
 	DB = TidyPlatesThreat.db.profile
 	local db = DB.settings.elitehealthborder
-	if unit.isElite and db.show and not (unit.reaction == "FRIENDLY" and DB.friendlyNameOnly) then
+	-- no elite frame around name-only (or hidden) nameplates
+	local style = TidyPlatesThreat.SetStyle(unit)
+	if unit.isElite and db.show and style ~= "text" and style ~= "empty" then
 		frame.Icon:SetTexture(path .. db.texture)
 		frame:Show()
 	else
