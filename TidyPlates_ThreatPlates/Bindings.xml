@@ -1,5 +1,11 @@
 <Bindings>
-	<Binding name="TPTP_FRIENDLY_NPCS" header="TPTP">
+	<Binding name="TPTP_ENEMY_NAMEPLATES" header="TPTP">
+		TidyPlatesThreat:ToggleEnemyNameplates()
+	</Binding>
+	<Binding name="TPTP_FRIENDLY_PLAYERS">
+		TidyPlatesThreat:ToggleFriendlyPlayers()
+	</Binding>
+	<Binding name="TPTP_FRIENDLY_NPCS">
 		TidyPlatesThreat:ToggleFriendlyNPCs()
 	</Binding>
 	<Binding name="TPTP_ALL_NAMEPLATES">

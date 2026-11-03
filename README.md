@@ -134,14 +134,14 @@ number above the health bar (on a dark background, readable on any ground), in c
 - **Nameplate keys** (remembered per character, changeable in Key Bindings → Threat Plates):
   | Key | Toggles |
   | --- | --- |
-  | V | enemy nameplates (the game's V also hid the friendly ones; fixed) |
+  | V | enemy nameplates only |
   | Shift+V | friendly players |
   | Alt+V | friendly NPCs (new) |
   | Ctrl+V | everything off / on |
 
   The game has one switch for friendly players and NPCs; it stays on while either is wanted, and the other kind is
-  hidden by the addon. Alt+V / Ctrl+V are assigned once per character, only if the key is free (Ctrl+V: or still on
-  the game's "all nameplates").
+  hidden by the addon. All four keys are Threat Plates key bindings (the client's own V / Shift+V also hid other
+  things); they are assigned once per character, a key that was used for something else is reported in chat.
 - **Overlapping** nameplates on / off in the menu (Nameplate Settings → General Settings → Blizzard Settings), same as
   `/tptpol`.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.

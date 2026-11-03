@@ -750,6 +750,8 @@ f:SetScript("OnEvent", EventHandler)
 -- and the unwanted kind is hidden by SetStyle.
 -----------------------------------------------------------------------------
 BINDING_HEADER_TPTP = "Threat Plates"
+BINDING_NAME_TPTP_ENEMY_NAMEPLATES = "Enemy nameplates on / off"
+BINDING_NAME_TPTP_FRIENDLY_PLAYERS = "Friendly player nameplates on / off"
 BINDING_NAME_TPTP_FRIENDLY_NPCS = "Friendly NPC nameplates on / off"
 BINDING_NAME_TPTP_ALL_NAMEPLATES = "All nameplates on / off"
 
@@ -771,6 +773,18 @@ function TidyPlatesThreat:SetFriendlyPlayers(on)
 	self:ApplyFriendlyNameplates()
 end
 
+function TidyPlatesThreat:ToggleEnemyNameplates()
+	local on = GetCVar("nameplateShowEnemies") ~= "1"
+	SetCVar("nameplateShowEnemies", on and 1 or 0)
+	NAMEPLATES_ON = on and true or nil
+	-- some clients touch the friendly switch too: keep it as wanted
+	self:ApplyFriendlyNameplates()
+end
+
+function TidyPlatesThreat:ToggleFriendlyPlayers()
+	self:SetFriendlyPlayers(not self.friendlyPlayers)
+end
+
 function TidyPlatesThreat:ToggleFriendlyNPCs()
 	self.friendlyNPCs = not self.friendlyNPCs
 	self:ApplyFriendlyNameplates()
@@ -786,28 +800,37 @@ function TidyPlatesThreat:ToggleAllNameplates()
 	self:ApplyFriendlyNameplates()
 end
 
--- Alt+V and Ctrl+V: given to Threat Plates once per character, only if the key is free
--- (Ctrl+V: or still on the game's own "all nameplates"); can be changed in Key Bindings
+-- V, Shift+V, Alt+V and Ctrl+V are given to Threat Plates once per character (the client's own
+-- V / Shift+V do not work as wanted on Grimfall). A key that was used for something else is
+-- reported in chat. They can be changed in Key Bindings -> Threat Plates.
+local NAMEPLATE_KEYS = {
+	{"V", "TPTP_ENEMY_NAMEPLATES"},
+	{"SHIFT-V", "TPTP_FRIENDLY_PLAYERS"},
+	{"ALT-V", "TPTP_FRIENDLY_NPCS"},
+	{"CTRL-V", "TPTP_ALL_NAMEPLATES"}
+}
+local GAME_NAMEPLATE_ACTIONS = {NAMEPLATES = true, FRIENDNAMEPLATES = true, ALLNAMEPLATES = true}
 function TidyPlatesThreat:AssignNameplateKeys()
 	local char = self.db and self.db.char
-	if not char or char.keysAssigned or InCombatLockdown() then
+	if not char or char.nameplateKeys == 2 or InCombatLockdown() then
 		return
 	end
 	local changed
-	local alt = GetBindingAction("ALT-V")
-	if alt == nil or alt == "" then
-		SetBinding("ALT-V", "TPTP_FRIENDLY_NPCS")
-		changed = true
-	end
-	local ctrl = GetBindingAction("CTRL-V")
-	if ctrl == nil or ctrl == "" or ctrl == "ALLNAMEPLATES" then
-		SetBinding("CTRL-V", "TPTP_ALL_NAMEPLATES")
-		changed = true
+	for _, k in ipairs(NAMEPLATE_KEYS) do
+		local key, action = k[1], k[2]
+		local current = GetBindingAction(key)
+		if current ~= action then
+			if current and current ~= "" and not GAME_NAMEPLATE_ACTIONS[current] then
+				print("|cff89F559Threat Plates|r: " .. key .. " was bound to " .. current .. ", now it toggles nameplates (Key Bindings -> Threat Plates to change).")
+			end
+			SetBinding(key, action)
+			changed = true
+		end
 	end
 	if changed then
 		SaveBindings(GetCurrentBindingSet())
 	end
-	char.keysAssigned = true
+	char.nameplateKeys = 2
 end
 
 -- the game's V hides friendly nameplates too: put them back as wanted
