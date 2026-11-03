@@ -697,6 +697,7 @@ local function GetOptions()
 													end,
 													set = function()
 														SetCVar("nameplateShowEnemies", abs(GetCVar("nameplateShowEnemies") - 1))
+														NAMEPLATES_ON = (GetCVar("nameplateShowEnemies") == "1") or nil
 													end
 												},
 												nameplateShowEnemyPets = {
@@ -1012,12 +1013,22 @@ local function GetOptions()
 											type = "toggle",
 											order = 1,
 											get = function()
-												return (GetCVar("nameplateShowFriends") == "1")
+												return TidyPlatesThreat.friendlyPlayers ~= false
 											end,
 											set = function()
-												SetCVar("nameplateShowFriends", abs(GetCVar("nameplateShowFriends") - 1))
-												TidyPlatesThreat.friendNameplatesWanted = (GetCVar("nameplateShowFriends") == "1")
-												FRIENDNAMEPLATES_ON = TidyPlatesThreat.friendNameplatesWanted and true or nil
+												TidyPlatesThreat:SetFriendlyPlayers(not TidyPlatesThreat.friendlyPlayers)
+											end
+										},
+										nameplateShowFriendlyNPCs = {
+											name = "NPCs (Alt+V)",
+											type = "toggle",
+											order = 2,
+											desc = "Guards, vendors, quest givers...",
+											get = function()
+												return TidyPlatesThreat.friendlyNPCs ~= false
+											end,
+											set = function()
+												TidyPlatesThreat:ToggleFriendlyNPCs()
 											end
 										},
 										nameplateShowFriendlyPets = {
@@ -4891,6 +4902,7 @@ local GROUP_HELP = {
 	["NameplateSettings.SkullIcon"] = "Skull icon on bosses and mobs far above your level.",
 	["NameplateSettings.SpellIcon"] = "Icon of the spell being cast, next to the castbar.",
 	["NameplateSettings.Raidmarks"] = "Raid target mark (skull, cross, star...) on the nameplate.",
+	["NameplateSettings.Friendly.Show"] = "Keys: |cffffd100V|r enemy nameplates, |cffffd100Shift+V|r friendly players, |cffffd100Alt+V|r friendly NPCs, |cffffd100Ctrl+V|r everything off / on. Remembered per character. The keys can be changed in the game's Key Bindings (Threat Plates).",
 	["NameplateSettings.Totems"] = "Nameplates of shaman totems: each totem can get its own icon and health bar color, or be hidden.",
 	["NameplateSettings.Totems.TotemSettings.Toggles"] = "|cffffd100Hide Healthbars|r: show only the totem icon, without a health bar.",
 	-- Threat System

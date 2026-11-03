@@ -578,7 +578,13 @@ function TidyPlatesThreat.SetStyle(unit)
 				return "empty"
 			end
 		elseif unit.reaction == "FRIENDLY" then
-			if DB.friendlyNameOnly and unit.type ~= "PLAYER" then
+			-- Shift+V (friendly players) and Alt+V (friendly NPCs) are separate; the game has only
+			-- one switch for both, so the one that is off is hidden here
+			if unit.type == "PLAYER" and TidyPlatesThreat.friendlyPlayers == false then
+				return "empty"
+			elseif unit.type ~= "PLAYER" and TidyPlatesThreat.friendlyNPCs == false then
+				return "empty"
+			elseif DB.friendlyNameOnly and unit.type ~= "PLAYER" then
 				-- friendly NPCs: name only
 				return "text"
 			elseif unit.type == "PLAYER" and DB.friendlyPlayerMode == "name" and unit.health and unit.healthmax and unit.health >= unit.healthmax then
@@ -672,22 +678,25 @@ local function EventHandler(self, event, ...)
 		-- with its own colors (one enemy color, friendly player color...).
 		SetCVar("ShowClassColorInNameplate", 1)
 
-		-- Enemy / friendly nameplates per character: on the first login of a character both are
-		-- turned on; after that the state the character had at logout is restored (the game
-		-- itself keeps only one setting for all characters).
+		-- Nameplates per character: on the first login of a character everything is turned on;
+		-- after that the state the character had at logout is restored (the game itself keeps
+		-- only one setting for all characters).
 		if CharDB.showEnemies == nil then
 			CharDB.showEnemies = true
 		end
 		if CharDB.showFriends == nil then
 			CharDB.showFriends = true
 		end
+		if CharDB.showFriendlyNPCs == nil then
+			CharDB.showFriendlyNPCs = true
+		end
 		SetCVar("nameplateShowEnemies", CharDB.showEnemies and 1 or 0)
-		SetCVar("nameplateShowFriends", CharDB.showFriends and 1 or 0)
-		-- the key bindings toggle by these globals: keep them in step, so the first V / Shift+V
-		-- press does what you expect
+		-- the key bindings toggle by this global: keep it in step, so the first V press is right
 		NAMEPLATES_ON = CharDB.showEnemies and true or nil
-		FRIENDNAMEPLATES_ON = CharDB.showFriends and true or nil
-		TidyPlatesThreat.friendNameplatesWanted = CharDB.showFriends
+		TidyPlatesThreat.friendlyPlayers = CharDB.showFriends
+		TidyPlatesThreat.friendlyNPCs = CharDB.showFriendlyNPCs
+		TidyPlatesThreat:ApplyFriendlyNameplates()
+		TidyPlatesThreat:AssignNameplateKeys()
 
 		if CharDB.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) and DB.verbose then
 			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. "FFFFFF" .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())
@@ -716,7 +725,10 @@ local function EventHandler(self, event, ...)
 	elseif event == "PLAYER_LOGOUT" then
 		-- remember this character's enemy / friendly nameplate state for the next login
 		CharDB.showEnemies = (GetCVar("nameplateShowEnemies") == "1")
-		CharDB.showFriends = (GetCVar("nameplateShowFriends") == "1")
+		if TidyPlatesThreat.friendlyPlayers ~= nil then
+			CharDB.showFriends = TidyPlatesThreat.friendlyPlayers
+			CharDB.showFriendlyNPCs = TidyPlatesThreat.friendlyNPCs
+		end
 	end
 end
 f:RegisterEvent("ADDON_LOADED")
@@ -729,16 +741,78 @@ f:RegisterEvent("RAID_TARGET_UPDATE")
 f:SetScript("OnEvent", EventHandler)
 
 -----------------------------------------------------------------------------
--- V only toggles enemy nameplates
--- The game's V hides ALL nameplates (friendly too) but shows only the enemy ones again.
--- We remember whether friendly nameplates are wanted (Shift+V, the menu) and restore them
--- after V, so V never touches the friendly ones.
+-- Nameplate keys
+--   V       enemy nameplates (the game's V also hid the friendly ones: fixed here)
+--   Shift+V friendly players          (the game's key, kept apart from the NPCs here)
+--   Alt+V   friendly NPCs             (Threat Plates)
+--   Ctrl+V  everything off / on       (Threat Plates)
+-- The game has one switch for friendly players and NPCs; it is on when either is wanted,
+-- and the unwanted kind is hidden by SetStyle.
 -----------------------------------------------------------------------------
-local function RestoreFriendly()
-	if TidyPlatesThreat.friendNameplatesWanted ~= nil then
-		SetCVar("nameplateShowFriends", TidyPlatesThreat.friendNameplatesWanted and 1 or 0)
-		FRIENDNAMEPLATES_ON = TidyPlatesThreat.friendNameplatesWanted and true or nil
+BINDING_HEADER_TPTP = "Threat Plates"
+BINDING_NAME_TPTP_FRIENDLY_NPCS = "Friendly NPC nameplates on / off"
+BINDING_NAME_TPTP_ALL_NAMEPLATES = "All nameplates on / off"
+
+function TidyPlatesThreat:ApplyFriendlyNameplates()
+	local players, npcs = self.friendlyPlayers, self.friendlyNPCs
+	if players == nil then
+		return
 	end
+	SetCVar("nameplateShowFriends", (players or npcs) and 1 or 0)
+	-- the game's Shift+V toggles by this global: it follows the friendly players
+	FRIENDNAMEPLATES_ON = players and true or nil
+	if TidyPlates and TidyPlates.ForceUpdate then
+		TidyPlates:ForceUpdate()
+	end
+end
+
+function TidyPlatesThreat:SetFriendlyPlayers(on)
+	self.friendlyPlayers = on and true or false
+	self:ApplyFriendlyNameplates()
+end
+
+function TidyPlatesThreat:ToggleFriendlyNPCs()
+	self.friendlyNPCs = not self.friendlyNPCs
+	self:ApplyFriendlyNameplates()
+end
+
+function TidyPlatesThreat:ToggleAllNameplates()
+	local allOn = GetCVar("nameplateShowEnemies") == "1" and self.friendlyPlayers and self.friendlyNPCs
+	local on = not allOn
+	SetCVar("nameplateShowEnemies", on and 1 or 0)
+	NAMEPLATES_ON = on and true or nil
+	self.friendlyPlayers = on
+	self.friendlyNPCs = on
+	self:ApplyFriendlyNameplates()
+end
+
+-- Alt+V and Ctrl+V: given to Threat Plates once per character, only if the key is free
+-- (Ctrl+V: or still on the game's own "all nameplates"); can be changed in Key Bindings
+function TidyPlatesThreat:AssignNameplateKeys()
+	local char = self.db and self.db.char
+	if not char or char.keysAssigned or InCombatLockdown() then
+		return
+	end
+	local changed
+	local alt = GetBindingAction("ALT-V")
+	if alt == nil or alt == "" then
+		SetBinding("ALT-V", "TPTP_FRIENDLY_NPCS")
+		changed = true
+	end
+	local ctrl = GetBindingAction("CTRL-V")
+	if ctrl == nil or ctrl == "" or ctrl == "ALLNAMEPLATES" then
+		SetBinding("CTRL-V", "TPTP_ALL_NAMEPLATES")
+		changed = true
+	end
+	if changed then
+		SaveBindings(GetCurrentBindingSet())
+	end
+	char.keysAssigned = true
+end
+
+-- the game's V hides friendly nameplates too: put them back as wanted
+local function RestoreFriendly()
+	TidyPlatesThreat:ApplyFriendlyNameplates()
 end
 if type(HideNameplates) == "function" then
 	hooksecurefunc("HideNameplates", RestoreFriendly)
@@ -746,13 +820,14 @@ end
 if type(ShowNameplates) == "function" then
 	hooksecurefunc("ShowNameplates", RestoreFriendly)
 end
+-- the game's Shift+V: friendly players only
 if type(ShowFriendNameplates) == "function" then
 	hooksecurefunc("ShowFriendNameplates", function()
-		TidyPlatesThreat.friendNameplatesWanted = true
+		TidyPlatesThreat:SetFriendlyPlayers(true)
 	end)
 end
 if type(HideFriendNameplates) == "function" then
 	hooksecurefunc("HideFriendNameplates", function()
-		TidyPlatesThreat.friendNameplatesWanted = false
+		TidyPlatesThreat:SetFriendlyPlayers(false)
 	end)
 end

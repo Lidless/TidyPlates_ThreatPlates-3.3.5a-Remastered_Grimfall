@@ -1,0 +1,8 @@
+<Bindings>
+	<Binding name="TPTP_FRIENDLY_NPCS" header="TPTP">
+		TidyPlatesThreat:ToggleFriendlyNPCs()
+	</Binding>
+	<Binding name="TPTP_ALL_NAMEPLATES">
+		TidyPlatesThreat:ToggleAllNameplates()
+	</Binding>
+</Bindings>

@@ -131,8 +131,17 @@ number above the health bar (on a dark background, readable on any ground), in c
 - **Nameplates on by default, remembered per character**: on a character's first login both enemy and friendly
   nameplates are turned on; after that the state the character had at logout (V / Shift+V) is restored at the next
   login (the game itself keeps one setting for all characters).
-- **V toggles only the enemy nameplates**: the game's V also hid the friendly ones and did not bring them back; the
-  friendly state (Shift+V) is now kept.
+- **Nameplate keys** (remembered per character, changeable in Key Bindings → Threat Plates):
+  | Key | Toggles |
+  | --- | --- |
+  | V | enemy nameplates (the game's V also hid the friendly ones; fixed) |
+  | Shift+V | friendly players |
+  | Alt+V | friendly NPCs (new) |
+  | Ctrl+V | everything off / on |
+
+  The game has one switch for friendly players and NPCs; it stays on while either is wanted, and the other kind is
+  hidden by the addon. Alt+V / Ctrl+V are assigned once per character, only if the key is free (Ctrl+V: or still on
+  the game's "all nameplates").
 - **Overlapping** nameplates on / off in the menu (Nameplate Settings → General Settings → Blizzard Settings), same as
   `/tptpol`.
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
