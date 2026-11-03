@@ -672,6 +672,18 @@ local function EventHandler(self, event, ...)
 		-- with its own colors (one enemy color, friendly player color...).
 		SetCVar("ShowClassColorInNameplate", 1)
 
+		-- Enemy / friendly nameplates per character: on the first login of a character both are
+		-- turned on; after that the state the character had at logout is restored (the game
+		-- itself keeps only one setting for all characters).
+		if CharDB.showEnemies == nil then
+			CharDB.showEnemies = true
+		end
+		if CharDB.showFriends == nil then
+			CharDB.showFriends = true
+		end
+		SetCVar("nameplateShowEnemies", CharDB.showEnemies and 1 or 0)
+		SetCVar("nameplateShowFriends", CharDB.showFriends and 1 or 0)
+
 		if CharDB.welcome and ((TidyPlatesOptions.primary == "Threat Plates") or (TidyPlatesOptions.secondary == "Threat Plates")) and DB.verbose then
 			print(L["|cff89f559Threat Plates:|r Welcome back |cff"] .. "FFFFFF" .. (UnitName("player") or "") .. "|r!! Role: " .. TidyPlatesThreat:roleText())
 		end
@@ -696,6 +708,10 @@ local function EventHandler(self, event, ...)
 		end
 	elseif event == "RAID_TARGET_UPDATE" then
 		TidyPlates:Update()
+	elseif event == "PLAYER_LOGOUT" then
+		-- remember this character's enemy / friendly nameplate state for the next login
+		CharDB.showEnemies = (GetCVar("nameplateShowEnemies") == "1")
+		CharDB.showFriends = (GetCVar("nameplateShowFriends") == "1")
 	end
 end
 f:RegisterEvent("ADDON_LOADED")

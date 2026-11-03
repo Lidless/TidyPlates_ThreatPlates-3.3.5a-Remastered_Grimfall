@@ -128,6 +128,9 @@ number above the health bar (on a dark background, readable on any ground), in c
   classes and the classless realm they would not mean anything.
 - **Friends & Guild Icon** widget (formerly *Social Widget*): clearer texts, the Battle.net part removed (no Battle.net on
   Grimfall).
+- **Nameplates on by default, remembered per character**: on a character's first login both enemy and friendly
+  nameplates are turned on; after that the state the character had at logout (V / Shift+V) is restored at the next
+  login (the game itself keeps one setting for all characters).
 - **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
 - Short **help texts** at the top of the option groups and next to settings whose purpose is not obvious (e.g. the
   Threat System settings only override the Nameplate Settings in combat).
