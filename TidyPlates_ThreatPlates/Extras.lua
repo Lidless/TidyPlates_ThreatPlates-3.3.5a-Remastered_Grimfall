@@ -642,13 +642,13 @@ local function GetDecor(ext)
 	end
 	-- dispellable arrow
 	local arrow = CreateFrame("Frame", nil, ext)
-	arrow:SetWidth(16)
-	arrow:SetHeight(16)
+	arrow:SetWidth(19) -- 20% bigger than the first version, easier to see
+	arrow:SetHeight(19)
 	arrow:SetFrameLevel(ext:GetFrameLevel() + 5)
 	local at = arrow:CreateTexture(nil, "OVERLAY")
 	at:SetAllPoints(arrow)
 	at:SetTexture(ARROW_TEXTURE)
-	at:SetVertexColor(0.3, 0.8, 1)
+	at:SetVertexColor(1, 0.55, 0) -- orange
 	arrow.tex = at
 	arrow:Hide()
 	d.arrow = arrow
