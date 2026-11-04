@@ -492,6 +492,11 @@ local function ScanTooltip()
 	if not mob then
 		return
 	end
+	-- only mobs you can attack: quest givers / turn-in NPCs name the quest in their tooltip too
+	if not UnitCanAttack("player", uid) then
+		LearnedQuestMobs()[Lower(mob)] = nil -- clean up a wrong earlier match
+		return
+	end
 	if questDirty then
 		RebuildQuests()
 	end
@@ -542,9 +547,9 @@ local function ScanLoot()
 		return
 	end
 	local mob
-	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
+	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") and UnitCanAttack("player", "mouseover") then
 		mob = UnitName("mouseover")
-	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") then
+	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") and UnitCanAttack("player", "target") then
 		mob = UnitName("target")
 	end
 	if not mob then
