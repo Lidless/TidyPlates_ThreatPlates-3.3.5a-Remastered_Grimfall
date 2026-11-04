@@ -131,7 +131,8 @@ number above the health bar (on a dark background, readable on any ground), in c
 - **Nameplates on by default, remembered per character**: on a character's first login both enemy and friendly
   nameplates are turned on; after that the state the character had at logout (V / Shift+V) is restored at the next
   login (the game itself keeps one setting for all characters).
-- **Service icons** (Nameplate Settings → Friendly, on by default): an icon above friendly / neutral service NPCs
+- **Service icons** (Nameplate Settings → Friendly, on by default): an icon, the title text (e.g. *Shaman Trainer*) or
+  both above friendly / neutral service NPCs
   (flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents,
   poisons, ammo, other vendors). The game tells an NPC's job only in its tooltip (`<Flight Master>`), so each NPC is
   learned the first time you mouse over it and remembered for all characters.

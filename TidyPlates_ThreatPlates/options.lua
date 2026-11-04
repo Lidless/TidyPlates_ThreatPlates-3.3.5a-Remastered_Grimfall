@@ -1220,7 +1220,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "An icon above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters).\n"
+											name = "An icon and / or the title (e.g. Shaman Trainer) above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters).\n"
 										},
 										Toggle = {
 											name = L["Enable"],
@@ -1232,6 +1232,22 @@ local function GetOptions()
 											end,
 											set = function(info, val)
 												db.serviceIcons.ON = val
+											end
+										},
+										Mode = {
+											name = "Show",
+											type = "select",
+											order = 1.5,
+											values = {icon = "Icon", text = "Title text", both = "Icon and title"},
+											desc = "Title text: the NPC's job written out (e.g. Shaman Trainer), handy when many trainers stand side by side. NPCs without an icon rule still show their title.",
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.mode or "icon"
+											end,
+											set = function(info, val)
+												db.serviceIcons.mode = val
 											end
 										},
 										Size = {

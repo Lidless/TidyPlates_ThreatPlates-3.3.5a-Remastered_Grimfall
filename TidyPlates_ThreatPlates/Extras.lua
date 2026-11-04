@@ -603,6 +603,11 @@ local function GetDecor(ext)
 	local st = svc:CreateTexture(nil, "OVERLAY")
 	st:SetAllPoints(svc)
 	svc.tex = st
+	-- the title as text (e.g. "Shaman Trainer"), instead of or next to the icon
+	local sl = svc:CreateFontString(nil, "OVERLAY")
+	sl:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	sl:SetTextColor(1, 0.82, 0)
+	svc.label = sl
 	svc:Hide()
 	d.service = svc
 	-- threat %
@@ -756,20 +761,49 @@ local function UpdatePlates(elapsed)
 				d.threatPct:Hide()
 			end
 
-			-- service icon (friendly / neutral NPCs, also when shown as name only)
+			-- service icon / title (friendly / neutral NPCs, also when shown as name only)
 			local si = db.serviceIcons
-			local icon
+			local title, icon
 			if si and si.ON and unit.type == "NPC" and (unit.reaction == "FRIENDLY" or unit.reaction == "NEUTRAL") and ext.stylename ~= "empty" then
-				icon = ServiceIcon(KnownTitles()[unit.name])
+				title = KnownTitles()[unit.name]
+				icon = ServiceIcon(title)
 			end
-			if icon then
+			local mode = si and si.mode or "icon"
+			local showIcon = icon and (mode == "icon" or mode == "both")
+			local showText = title and (mode == "text" or mode == "both")
+			if showIcon or showText then
+				local svc = d.service
 				local size = si.size or 20
-				d.service:SetWidth(size)
-				d.service:SetHeight(size)
-				d.service:ClearAllPoints()
-				d.service:SetPoint("BOTTOM", ext, "CENTER", 0, 18 + (si.y or 0))
-				d.service.tex:SetTexture(icon)
-				d.service:Show()
+				svc:SetHeight(size)
+				svc.label:ClearAllPoints()
+				if showIcon then
+					svc.tex:SetTexture(icon)
+					svc.tex:ClearAllPoints()
+					svc.tex:SetPoint("LEFT", svc, "LEFT", 0, 0)
+					svc.tex:SetWidth(size)
+					svc.tex:SetHeight(size)
+					svc.tex:Show()
+				else
+					svc.tex:Hide()
+				end
+				if showText then
+					svc.label:SetText(title)
+					if showIcon then
+						svc.label:SetPoint("LEFT", svc.tex, "RIGHT", 2, 0)
+					else
+						svc.label:SetPoint("LEFT", svc, "LEFT", 0, 0)
+					end
+					svc.label:Show()
+				else
+					svc.label:SetText("")
+					svc.label:Hide()
+				end
+				-- centre the icon + text group above the name
+				local width = (showIcon and size or 0) + (showText and ((showIcon and 2 or 0) + (svc.label:GetStringWidth() or 0)) or 0)
+				svc:SetWidth(math.max(width, 1))
+				svc:ClearAllPoints()
+				svc:SetPoint("BOTTOM", ext, "CENTER", 0, 18 + (si.y or 0))
+				svc:Show()
 			else
 				d.service:Hide()
 			end
