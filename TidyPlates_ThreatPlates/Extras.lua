@@ -343,6 +343,9 @@ local questObjectives = {} -- list of objectives {quest, name, cur, max, done, k
 local objectiveByKey = {}  -- "quest|objective" -> objective
 local killTargets = {}     -- lower case mob name -> objective (kill objectives)
 local questDirty, lastQuestBuild = true, 0
+local QUEST_REFRESH = 2 -- seconds; the quest log is also re-read regularly (the game can report a
+                        -- change before the log really changed, e.g. right at turn-in)
+local pruneAfter = 0    -- no forgetting right after login: the quest log can still be empty then
 
 local function Lower(str)
 	return str and string.lower(str)
@@ -387,6 +390,9 @@ local function RebuildQuests()
 	questDirty = false
 	lastQuestBuild = GetTime()
 	-- forget mobs learned for quests that are no longer in the quest log (turned in / abandoned)
+	if GetTime() < pruneAfter then
+		return
+	end
 	local learned = LearnedQuestMobs()
 	for mob, keys in pairs(learned) do
 		for key in pairs(keys) do
@@ -401,7 +407,8 @@ local function RebuildQuests()
 end
 
 local function UpdateQuestsIfNeeded()
-	if questDirty and GetTime() - lastQuestBuild > 0.5 then
+	local age = GetTime() - lastQuestBuild
+	if (questDirty and age > 0.5) or age > QUEST_REFRESH then
 		RebuildQuests()
 	end
 end
@@ -930,6 +937,7 @@ driver:SetScript("OnEvent", function(self, event, ...)
 		-- new battleground / arena / dungeon: forget the old healers
 		ResetHealers()
 		questDirty = true
+		pruneAfter = GetTime() + 10
 	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" then
 		questDirty = true
 	elseif event == "LOOT_OPENED" then
