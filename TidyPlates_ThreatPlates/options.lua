@@ -1000,7 +1000,7 @@ local function GetOptions()
 									type = "description",
 									order = 0,
 									fontSize = "medium",
-									name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, and effects on your party / raid members.\n"
+									name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, service icons above traders, and effects on your party / raid members.\n"
 								},
 								Show = {
 									type = "group",
@@ -1207,6 +1207,77 @@ local function GetOptions()
 											get = GetValue,
 											set = SetValue,
 											arg = {"friendlyNameOnly"}
+										}
+									}
+								},
+								ServiceIcons = {
+									name = "Service icons",
+									type = "group",
+									inline = true,
+									order = 4.5,
+									args = {
+										Info = {
+											type = "description",
+											order = 0,
+											fontSize = "medium",
+											name = "An icon above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters).\n"
+										},
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											get = function()
+												return db.serviceIcons.ON
+											end,
+											set = function(info, val)
+												db.serviceIcons.ON = val
+											end
+										},
+										Size = {
+											name = "Icon size",
+											type = "range",
+											order = 2,
+											min = 10,
+											max = 40,
+											step = 1,
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.size
+											end,
+											set = function(info, val)
+												db.serviceIcons.size = val
+											end
+										},
+										Height = {
+											name = "Height",
+											type = "range",
+											order = 3,
+											min = -30,
+											max = 60,
+											step = 1,
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.y
+											end,
+											set = function(info, val)
+												db.serviceIcons.y = val
+											end
+										},
+										Forget = {
+											name = "Forget learned NPCs",
+											type = "execute",
+											order = 4,
+											desc = "Clears the remembered NPC titles; they are learned again on mouseover.",
+											confirm = true,
+											confirmText = "Forget all learned service NPCs?",
+											func = function()
+												TidyPlatesThreat.ForgetServiceNPCs()
+											end
 										}
 									}
 								},

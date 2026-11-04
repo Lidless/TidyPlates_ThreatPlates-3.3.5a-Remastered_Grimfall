@@ -12,6 +12,10 @@
 --                         focus (the game gives numbers only for these). DPS / Healer: how
 --                         close you are to pulling (100% = you pull); Tank: own threat,
 --                         100% = the mob is on you, lower = someone else has it.
+--   * Service icons     : icon above friendly / neutral service NPCs (flight master, innkeeper,
+--                         repair, bank, auction, trainers, vendors...). The game gives only the
+--                         NPC's title (<Flight Master>) in its tooltip, so an NPC is learned the
+--                         first time you mouse over it and remembered for all characters.
 --   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
 --                         from tooltips (any line naming an objective / quest) and from loot.
@@ -237,6 +241,87 @@ local function ThreatSound(oldBand, newBand)
 end
 
 -------------------------------------------------------------------------------
+-- Service icons (traders)
+-------------------------------------------------------------------------------
+local TRACK = "Interface\\Minimap\\Tracking\\"
+local VENDOR_ICON = "Interface\\GossipFrame\\VendorGossipIcon"
+local PROFESSIONS = {
+	"alchemy", "blacksmith", "enchant", "engineer", "herbalis", "inscription", "jewelcraft",
+	"leatherwork", "mining", "skinning", "tailor", "cooking", "first aid", "fishing", "riding"
+}
+-- first match wins (lower case parts of the title)
+local SERVICE_RULES = {
+	{TRACK .. "FlightMaster", {"flight master", "wind rider master", "gryphon master", "hippogryph master", "bat handler", "flight"}},
+	{TRACK .. "Innkeeper", {"innkeeper"}},
+	{TRACK .. "StableMaster", {"stable master"}},
+	{TRACK .. "Banker", {"banker", "bank"}},
+	{TRACK .. "Auctioneer", {"auctioneer"}},
+	{TRACK .. "BattleMaster", {"battlemaster"}},
+	{"TRAINER", {"trainer"}},
+	{TRACK .. "Repair", {"armorer", "weaponsmith", "weapon merchant", "repair", "armor merchant", "armorsmith"}},
+	{TRACK .. "Poisons", {"poison"}},
+	{TRACK .. "Reagents", {"reagent"}},
+	{TRACK .. "Ammunition", {"ammo", "bowyer", "gunsmith", "arrow", "bullet"}},
+	{TRACK .. "Food", {"food", "drink", "baker", "bread", "butcher", "meat", "fruit", "mushroom", "wine", "brew", "bartender", "cheese", "fishmonger"}},
+	{"Interface\\GossipFrame\\TabardGossipIcon", {"guild master", "tabard"}},
+	{VENDOR_ICON, {"vendor", "merchant", "supplies", "supplier", "goods", "trade", "shop", "seller", "quartermaster", "tailor", "clothier", "smith", "dealer", "provisioner"}}
+}
+
+local function ServiceIcon(title)
+	local t = title and string.lower(title)
+	if not t then
+		return
+	end
+	for _, rule in ipairs(SERVICE_RULES) do
+		for _, word in ipairs(rule[2]) do
+			if string.find(t, word, 1, true) then
+				if rule[1] == "TRAINER" then
+					for _, prof in ipairs(PROFESSIONS) do
+						if string.find(t, prof, 1, true) then
+							return TRACK .. "Profession"
+						end
+					end
+					return TRACK .. "Class"
+				end
+				return rule[1]
+			end
+		end
+	end
+end
+
+local function KnownTitles()
+	local g = TidyPlatesThreat.db and TidyPlatesThreat.db.global
+	if not g then
+		return {}
+	end
+	g.npcTitles = g.npcTitles or {}
+	return g.npcTitles
+end
+
+-- a non-player unit's tooltip: line 2 is its title when it is written as <Title>
+local function ScanServiceTooltip()
+	local db = DB()
+	if not (db and db.serviceIcons and db.serviceIcons.ON) then
+		return
+	end
+	local _, uid = GameTooltip:GetUnit()
+	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) or UnitCanAttack("player", uid) then
+		return
+	end
+	local name = UnitName(uid)
+	local fs = _G["GameTooltipTextLeft2"]
+	local line = fs and fs:GetText()
+	local title = line and string.match(line, "^<(.+)>$")
+	if name and title then
+		KnownTitles()[name] = title
+	end
+end
+
+function TidyPlatesThreat.ForgetServiceNPCs()
+	wipe(KnownTitles())
+end
+
+-------------------------------------------------------------------------------
 -- Quest mobs
 -------------------------------------------------------------------------------
 local QUEST_TEXTURE = "Interface\\GossipFrame\\AvailableQuestIcon"
@@ -364,6 +449,7 @@ tooltipScanner:SetScript("OnUpdate", function(self)
 	self:Hide()
 	if GameTooltip:IsShown() then
 		ScanTooltip()
+		ScanServiceTooltip()
 	end
 end)
 GameTooltip:HookScript("OnTooltipSetUnit", function()
@@ -511,6 +597,14 @@ local function GetDecor(ext)
 	quest:SetPoint("CENTER", ext, "CENTER", -12, 52)
 	quest:Hide()
 	d.quest = quest
+	-- service icon above the name of friendly / neutral NPCs
+	local svc = CreateFrame("Frame", nil, ext)
+	svc:SetFrameLevel(ext:GetFrameLevel() + 6)
+	local st = svc:CreateTexture(nil, "OVERLAY")
+	st:SetAllPoints(svc)
+	svc.tex = st
+	svc:Hide()
+	d.service = svc
 	-- threat %
 	local tp = CreateFrame("Frame", nil, ext)
 	tp:SetWidth(40)
@@ -660,6 +754,24 @@ local function UpdatePlates(elapsed)
 			else
 				d.threatPct.mob, d.threatPct.band, d.threatPct.blinkUntil = nil, nil, nil
 				d.threatPct:Hide()
+			end
+
+			-- service icon (friendly / neutral NPCs, also when shown as name only)
+			local si = db.serviceIcons
+			local icon
+			if si and si.ON and unit.type == "NPC" and (unit.reaction == "FRIENDLY" or unit.reaction == "NEUTRAL") and ext.stylename ~= "empty" then
+				icon = ServiceIcon(KnownTitles()[unit.name])
+			end
+			if icon then
+				local size = si.size or 20
+				d.service:SetWidth(size)
+				d.service:SetHeight(size)
+				d.service:ClearAllPoints()
+				d.service:SetPoint("BOTTOM", ext, "CENTER", 0, 18 + (si.y or 0))
+				d.service.tex:SetTexture(icon)
+				d.service:Show()
+			else
+				d.service:Hide()
 			end
 
 			-- quest mark
