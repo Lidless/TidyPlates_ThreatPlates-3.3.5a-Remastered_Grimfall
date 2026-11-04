@@ -495,18 +495,27 @@ local function ScanTooltip()
 	if questDirty then
 		RebuildQuests()
 	end
+	-- the tooltip often names the exact objective of this mob ("- Kreenig Snarlsnout's Tusk: 0/1");
+	-- the quest title alone is used only when no objective is named
+	local byObjective, byTitle = {}, {}
 	for i = 2, GameTooltip:NumLines() do
 		local fs = _G["GameTooltipTextLeft" .. i]
 		local text = fs and Lower(fs:GetText())
 		if text and text ~= "" then
 			for _, obj in ipairs(questObjectives) do
-				if not obj.done then
-					local on, oq = Lower(obj.name), Lower(obj.quest)
-					if (#on >= MIN_MATCH_LEN and string.find(text, on, 1, true)) or (#oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true)) then
-						LearnQuestMob(mob, obj)
-					end
+				local on, oq = Lower(obj.name), Lower(obj.quest)
+				if #on >= MIN_MATCH_LEN and string.find(text, on, 1, true) then
+					byObjective[obj] = true
+				elseif #oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true) then
+					byTitle[obj] = true
 				end
 			end
+		end
+	end
+	local learnFrom = next(byObjective) and byObjective or byTitle
+	for obj in pairs(learnFrom) do
+		if not obj.done then
+			LearnQuestMob(mob, obj)
 		end
 	end
 end
