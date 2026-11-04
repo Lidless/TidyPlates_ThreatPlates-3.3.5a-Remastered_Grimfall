@@ -946,7 +946,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it. Only your own quests (the game does not tell your group's quests).\n"
+											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it (learned even while switched off). Only your own quests (the game does not tell your group's quests).\n"
 										},
 										Toggle = {
 											name = L["Enable"],
@@ -1220,7 +1220,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "An icon and / or the title (e.g. Shaman Trainer) above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters).\n"
+											name = "An icon and / or the title (e.g. Shaman Trainer) above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters, learned even while switched off).\n"
 										},
 										Toggle = {
 											name = L["Enable"],

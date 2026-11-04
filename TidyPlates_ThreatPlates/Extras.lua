@@ -314,11 +314,8 @@ local function TooltipTitle(line)
 	return string.match(line, "^<(.+)>$") or line
 end
 
+-- learns also while the icons are switched off, so turning them on needs no new learning
 local function ScanServiceTooltip()
-	local db = DB()
-	if not (db and db.serviceIcons and db.serviceIcons.ON) then
-		return
-	end
 	local _, uid = GameTooltip:GetUnit()
 	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) or UnitCanAttack("player", uid) then
 		return
@@ -425,11 +422,8 @@ local function QuestFor(mob)
 end
 
 -- tooltip of a mob: any line naming an open objective or quest -> remember the mob
+-- learns also while quest marks are switched off
 local function ScanTooltip()
-	local db = DB()
-	if not (db and db.questMobs and db.questMobs.ON) then
-		return
-	end
 	local _, uid = GameTooltip:GetUnit()
 	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) then
 		return
@@ -472,11 +466,8 @@ GameTooltip:HookScript("OnTooltipSetUnit", function()
 end)
 
 -- looting a quest item from a corpse -> remember the mob
+-- learns also while quest marks are switched off
 local function ScanLoot()
-	local db = DB()
-	if not (db and db.questMobs and db.questMobs.ON) then
-		return
-	end
 	local mob
 	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
 		mob = UnitName("mouseover")
