@@ -18,7 +18,8 @@
 --                         first time you mouse over it and remembered for all characters.
 --   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
---                         from tooltips (any line naming an objective / quest) and from loot.
+--                         from tooltips (any line naming an objective / quest) and from loot
+--                         (only while switched on; forgotten when the quest leaves the log).
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -385,6 +386,18 @@ local function RebuildQuests()
 	end
 	questDirty = false
 	lastQuestBuild = GetTime()
+	-- forget mobs learned for quests that are no longer in the quest log (turned in / abandoned)
+	local learned = LearnedQuestMobs()
+	for mob, keys in pairs(learned) do
+		for key in pairs(keys) do
+			if not objectiveByKey[key] then
+				keys[key] = nil
+			end
+		end
+		if not next(keys) then
+			learned[mob] = nil
+		end
+	end
 end
 
 local function UpdateQuestsIfNeeded()
@@ -422,8 +435,12 @@ local function QuestFor(mob)
 end
 
 -- tooltip of a mob: any line naming an open objective or quest -> remember the mob
--- learns also while quest marks are switched off
+-- learns only while quest marks are switched on
 local function ScanTooltip()
+	local db = DB()
+	if not (db and db.questMobs and db.questMobs.ON) then
+		return
+	end
 	local _, uid = GameTooltip:GetUnit()
 	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) then
 		return
@@ -466,8 +483,12 @@ GameTooltip:HookScript("OnTooltipSetUnit", function()
 end)
 
 -- looting a quest item from a corpse -> remember the mob
--- learns also while quest marks are switched off
+-- learns only while quest marks are switched on
 local function ScanLoot()
+	local db = DB()
+	if not (db and db.questMobs and db.questMobs.ON) then
+		return
+	end
 	local mob
 	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
 		mob = UnitName("mouseover")
