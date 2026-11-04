@@ -341,7 +341,8 @@ local QUEST_TEXTURE = "Interface\\GossipFrame\\AvailableQuestIcon"
 local MIN_MATCH_LEN = 4 -- objective / quest names shorter than this are not matched in tooltips
 local questObjectives = {} -- list of objectives {quest, name, cur, max, done, kind, key}
 local objectiveByKey = {}  -- "quest|objective" -> objective
-local killTargets = {}     -- lower case mob name -> objective (kill objectives)
+local killTargets = {}     -- lower case mob name -> objective (open kill objectives)
+local killNames = {}       -- lower case mob name -> true (every kill objective, open or done)
 local questDirty, lastQuestBuild = true, 0
 local QUEST_REFRESH = 2 -- seconds; the quest log is also re-read regularly (the game can report a
                         -- change before the log really changed, e.g. right at turn-in)
@@ -364,6 +365,7 @@ local function RebuildQuests()
 	wipe(questObjectives)
 	wipe(objectiveByKey)
 	wipe(killTargets)
+	wipe(killNames)
 	for i = 1, (GetNumQuestLogEntries() or 0) do
 		local title, _, _, _, isHeader = GetQuestLogTitle(i)
 		if title and not isHeader then
@@ -380,8 +382,11 @@ local function RebuildQuests()
 					obj.key = title .. "|" .. name
 					objectiveByKey[obj.key] = obj
 					table.insert(questObjectives, obj)
-					if kind == "monster" and not obj.done then
-						killTargets[Lower(name)] = obj
+					if kind == "monster" then
+						killNames[Lower(name)] = true
+						if not obj.done then
+							killTargets[Lower(name)] = obj
+						end
 					end
 				end
 			end
@@ -396,7 +401,8 @@ local function RebuildQuests()
 	local learned = LearnedQuestMobs()
 	for mob, keys in pairs(learned) do
 		for key in pairs(keys) do
-			if not objectiveByKey[key] then
+			-- quest gone, or the mob is a kill objective (its mark comes from the kill objective)
+			if not objectiveByKey[key] or killNames[mob] then
 				keys[key] = nil
 			end
 		end
@@ -415,6 +421,11 @@ end
 
 local function LearnQuestMob(mob, obj)
 	local l = Lower(mob)
+	-- a mob you have to kill gets its mark from the kill objective; never tie it to other
+	-- objectives of the quest (e.g. an item dropped by another, named mob)
+	if killNames[l] or obj.kind == "monster" then
+		return
+	end
 	local learned = LearnedQuestMobs()
 	learned[l] = learned[l] or {}
 	learned[l][obj.key] = true
