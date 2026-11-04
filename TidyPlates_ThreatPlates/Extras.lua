@@ -298,7 +298,22 @@ local function KnownTitles()
 	return g.npcTitles
 end
 
--- a non-player unit's tooltip: line 2 is its title when it is written as <Title>
+-- a non-player unit's tooltip: line 2 is its title ("Trade Supplies" on Grimfall, "<Trade Supplies>"
+-- on other clients); NPCs without a title have the level line there
+local LEVEL_PREFIX = "^" .. (LEVEL or "Level") .. " "
+local function TooltipTitle(line)
+	if not line then
+		return
+	end
+	line = string.gsub(line, "|c%x%x%x%x%x%x%x%x", "")
+	line = string.gsub(line, "|r", "")
+	line = string.match(line, "^%s*(.-)%s*$")
+	if line == "" or string.find(line, LEVEL_PREFIX) or string.find(line, "^Level ") then
+		return
+	end
+	return string.match(line, "^<(.+)>$") or line
+end
+
 local function ScanServiceTooltip()
 	local db = DB()
 	if not (db and db.serviceIcons and db.serviceIcons.ON) then
@@ -311,7 +326,7 @@ local function ScanServiceTooltip()
 	local name = UnitName(uid)
 	local fs = _G["GameTooltipTextLeft2"]
 	local line = fs and fs:GetText()
-	local title = line and string.match(line, "^<(.+)>$")
+	local title = TooltipTitle(line)
 	if name and title then
 		KnownTitles()[name] = title
 	end
