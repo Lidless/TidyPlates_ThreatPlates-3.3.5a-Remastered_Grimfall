@@ -16,8 +16,9 @@
 --                         repair, bank, auction, trainers, vendors...). The game gives only the
 --                         NPC's title (<Flight Master>) in its tooltip, so an NPC is learned the
 --                         first time you mouse over it and remembered for all characters.
---   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need to
---                         kill for a quest (kill objectives of the quest log; nothing is stored).
+--   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need for a
+--                         quest: kill objectives from the quest log, item drop mobs learned
+--                         from tooltips (any line naming an objective / quest) and from loot.
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -336,6 +337,7 @@ end
 -- Quest mobs
 -------------------------------------------------------------------------------
 local QUEST_TEXTURE = "Interface\\GossipFrame\\AvailableQuestIcon"
+local MIN_MATCH_LEN = 4 -- objective / quest names shorter than this are not matched in tooltips
 local questObjectives = {} -- list of objectives {quest, name, cur, max, done, kind, key}
 local objectiveByKey = {}  -- "quest|objective" -> objective
 local killTargets = {}     -- lower case mob name -> objective (kill objectives)
@@ -343,6 +345,15 @@ local questDirty, lastQuestBuild = true, 0
 
 local function Lower(str)
 	return str and string.lower(str)
+end
+
+local function LearnedQuestMobs()
+	local g = TidyPlatesThreat.db and TidyPlatesThreat.db.global
+	if not g then
+		return {}
+	end
+	g.questMobs = g.questMobs or {}
+	return g.questMobs
 end
 
 local function RebuildQuests()
@@ -382,13 +393,62 @@ local function UpdateQuestsIfNeeded()
 	end
 end
 
+local function LearnQuestMob(mob, obj)
+	local l = Lower(mob)
+	local learned = LearnedQuestMobs()
+	learned[l] = learned[l] or {}
+	learned[l][obj.key] = true
+end
+
 -- the objective a mob is (still) needed for, or nil
 local function QuestFor(mob)
 	local l = Lower(mob)
 	if not l then
 		return
 	end
-	return killTargets[l]
+	local obj = killTargets[l]
+	if obj then
+		return obj
+	end
+	local keys = LearnedQuestMobs()[l]
+	if keys then
+		for key in pairs(keys) do
+			obj = objectiveByKey[key]
+			if obj and not obj.done then
+				return obj
+			end
+		end
+	end
+end
+
+-- tooltip of a mob: any line naming an open objective or quest -> remember the mob
+-- learns also while quest marks are switched off
+local function ScanTooltip()
+	local _, uid = GameTooltip:GetUnit()
+	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) then
+		return
+	end
+	local mob = UnitName(uid)
+	if not mob then
+		return
+	end
+	if questDirty then
+		RebuildQuests()
+	end
+	for i = 2, GameTooltip:NumLines() do
+		local fs = _G["GameTooltipTextLeft" .. i]
+		local text = fs and Lower(fs:GetText())
+		if text and text ~= "" then
+			for _, obj in ipairs(questObjectives) do
+				if not obj.done then
+					local on, oq = Lower(obj.name), Lower(obj.quest)
+					if (#on >= MIN_MATCH_LEN and string.find(text, on, 1, true)) or (#oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true)) then
+						LearnQuestMob(mob, obj)
+					end
+				end
+			end
+		end
+	end
 end
 
 -- other addons may add their lines to the tooltip right after us: scan on the next frame
@@ -397,12 +457,45 @@ tooltipScanner:Hide()
 tooltipScanner:SetScript("OnUpdate", function(self)
 	self:Hide()
 	if GameTooltip:IsShown() then
+		ScanTooltip()
 		ScanServiceTooltip()
 	end
 end)
 GameTooltip:HookScript("OnTooltipSetUnit", function()
 	tooltipScanner:Show()
 end)
+
+-- looting a quest item from a corpse -> remember the mob
+-- learns also while quest marks are switched off
+local function ScanLoot()
+	local mob
+	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
+		mob = UnitName("mouseover")
+	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") then
+		mob = UnitName("target")
+	end
+	if not mob then
+		return
+	end
+	if questDirty then
+		RebuildQuests()
+	end
+	for slot = 1, (GetNumLootItems() or 0) do
+		local _, itemName = GetLootSlotInfo(slot)
+		local l = Lower(itemName)
+		if l then
+			for _, obj in ipairs(questObjectives) do
+				if obj.kind == "item" and Lower(obj.name) == l then
+					LearnQuestMob(mob, obj)
+				end
+			end
+		end
+	end
+end
+
+function TidyPlatesThreat.ForgetQuestMobs()
+	wipe(LearnedQuestMobs())
+end
 
 -------------------------------------------------------------------------------
 -- Cast highlight list
@@ -813,16 +906,13 @@ driver:SetScript("OnEvent", function(self, event, ...)
 	elseif event == "PLAYER_REGEN_ENABLED" then
 		wipe(purgeable)
 	elseif event == "PLAYER_ENTERING_WORLD" then
-		-- quest mobs learned by an earlier version are not used any more
-		local g = TidyPlatesThreat.db and TidyPlatesThreat.db.global
-		if g and g.questMobs then
-			g.questMobs = nil
-		end
 		-- new battleground / arena / dungeon: forget the old healers
 		ResetHealers()
 		questDirty = true
 	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" then
 		questDirty = true
+	elseif event == "LOOT_OPENED" then
+		ScanLoot()
 	end
 end)
 driver:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -834,3 +924,4 @@ driver:RegisterEvent("PLAYER_REGEN_ENABLED")
 driver:RegisterEvent("PLAYER_ENTERING_WORLD")
 driver:RegisterEvent("QUEST_LOG_UPDATE")
 driver:RegisterEvent("UNIT_QUEST_LOG_CHANGED")
+driver:RegisterEvent("LOOT_OPENED")
