@@ -1244,7 +1244,7 @@ local function GetOptions()
 												return not db.serviceIcons.ON
 											end,
 											get = function()
-												return db.serviceIcons.mode or "icon"
+												return db.serviceIcons.mode or "both"
 											end,
 											set = function(info, val)
 												db.serviceIcons.mode = val

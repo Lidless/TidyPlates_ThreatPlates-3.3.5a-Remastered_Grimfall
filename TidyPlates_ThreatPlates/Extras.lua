@@ -852,7 +852,7 @@ local function UpdatePlates(elapsed)
 				title = KnownTitles()[unit.name]
 				icon = ServiceIcon(title)
 			end
-			local mode = si and si.mode or "icon"
+			local mode = si and si.mode or "both"
 			local showIcon = icon and (mode == "icon" or mode == "both")
 			local showText = title and (mode == "text" or mode == "both")
 			if showIcon or showText then
