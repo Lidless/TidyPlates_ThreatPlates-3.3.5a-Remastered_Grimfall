@@ -441,6 +441,31 @@ local function QuestFor(mob)
 	end
 end
 
+-- /tptpquest: why does the target (or the mouseover) have a quest mark?
+SLASH_TPTPQUEST1 = "/tptpquest"
+SlashCmdList["TPTPQUEST"] = function()
+	local uid = UnitExists("target") and "target" or "mouseover"
+	local mob = UnitName(uid)
+	local p = "|cff89F559Threat Plates|r: "
+	if not mob then
+		print(p .. "target a mob first")
+		return
+	end
+	RebuildQuests()
+	local l = Lower(mob)
+	local kill = killTargets[l]
+	print(p .. mob .. " - kill objective: " .. (kill and (kill.quest .. " / " .. kill.name .. " " .. kill.cur .. "/" .. kill.max) or "none"))
+	local keys = LearnedQuestMobs()[l]
+	if keys then
+		for key in pairs(keys) do
+			local obj = objectiveByKey[key]
+			print(p .. "  learned for: " .. key .. (obj and (" " .. obj.cur .. "/" .. obj.max .. (obj.done and " (done)" or "")) or " (quest gone)"))
+		end
+	else
+		print(p .. "  not learned for any quest")
+	end
+end
+
 -- tooltip of a mob: any line naming an open objective or quest -> remember the mob
 -- learns only while quest marks are switched on
 local function ScanTooltip()
