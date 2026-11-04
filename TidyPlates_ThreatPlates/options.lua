@@ -946,7 +946,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it (learned even while switched off). Only your own quests (the game does not tell your group's quests).\n"
+											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need to kill for a quest ('... slain: 3/10' objectives of your quest log); it disappears when the objective is complete. Nothing is stored. Only your own quests (the game does not tell your group's quests).\n"
 										},
 										Toggle = {
 											name = L["Enable"],
@@ -975,18 +975,6 @@ local function GetOptions()
 												db.questMobs.progress = val
 											end
 										},
-										Forget = {
-											name = "Forget learned quest mobs",
-											type = "execute",
-											order = 3,
-											width = "double",
-											desc = "Clears the list of mobs learned from tooltips and loot (e.g. after a wrong match). Kill objectives are not affected.",
-											confirm = true,
-											confirmText = "Forget all learned quest mobs?",
-											func = function()
-												TidyPlatesThreat.ForgetQuestMobs()
-											end
-										}
 									}
 								},
 							}

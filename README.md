@@ -102,9 +102,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   enemies, so a unit is marked after it healed others 3 times (self heals and procs like Vampiric Embrace do not count).
   Enemy players: only in battlegrounds and arenas; healer NPCs: everywhere (can be turned off). Cleared on zone change.
 - **Quest mobs** (same place, on by default): a big yellow **!** with your progress (e.g. 3/10) above the nameplate of
-  mobs you still need for a quest; gone when the objective is complete. Kill objectives come from the quest log; mobs
-  that drop quest items are learned when their tooltip names one of your open objectives / quests, or when you loot a
-  quest item from them (remembered across sessions, a *Forget* button clears the list). Only your own quests.
+  mobs you still need to kill for a quest (the "... slain: 3/10" objectives of your quest log); gone when the
+  objective is complete. Nothing is stored. Only your own quests.
 - **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a
   magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
 - **Nameplate Settings → Friendly**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
