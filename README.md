@@ -144,7 +144,7 @@ number above the health bar (on a dark background, readable on any ground), in c
   things); they are assigned once per character, a key that was used for something else is reported in chat.
 - **Overlapping** nameplates on / off in the menu (Nameplate Settings → General Settings → Blizzard Settings), same as
   `/tptpol`.
-- **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click opens the Role tab, right click switches the role (Tank > DPS > Healer), drag to move it. Can be hidden in the Role tab.
+- **Minimap button** whose icon shows your role (shield = Tank, swords = DPS, heal = Healer): left click DPS, middle click Tank, right click Healer, Alt+right click opens the options, drag to move it. Can be hidden in the Role tab.
 - Short **help texts** at the top of the option groups and next to settings whose purpose is not obvious (e.g. the
   Threat System settings only override the Nameplate Settings in combat).
 - New **Help** tab in `/tptp` describing the roles, warnings, commands and where to fine tune.

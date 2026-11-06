@@ -459,7 +459,7 @@ local function GetOptions()
 							type = "toggle",
 							order = 4,
 							width = "double",
-							desc = "Minimap button showing your role. Left click: open this tab. Right click: switch role (Tank > DPS > Healer). Drag: move it.",
+							desc = "Minimap button showing your role. Left click: DPS. Middle click: Tank. Right click: Healer. Alt+right click: options. Drag: move it.",
 							get = function()
 								return not (db.minimap and db.minimap.hide)
 							end,
