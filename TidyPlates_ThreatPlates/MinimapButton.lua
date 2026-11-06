@@ -1,8 +1,10 @@
 -----------------------------------------------------------------------------
 -- Minimap button
---   Left click : open the options on the Role tab
---   Right click: cycle the role  Tank -> DPS -> Healer -> Tank
---   Drag       : move the button around the minimap
+--   Left click      : role DPS
+--   Middle click    : role Tank
+--   Right click     : role Healer
+--   Alt+right click : open the options
+--   Drag            : move the button around the minimap
 -- The icon shows the current role.
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
@@ -12,7 +14,6 @@ local ROLE_ICON = {
 	DPS = "Interface\\Icons\\Ability_DualWield",
 	HEALER = "Interface\\Icons\\Spell_Holy_FlashHeal"
 }
-local NEXT_ROLE = {TANK = "DPS", DPS = "HEALER", HEALER = "TANK"}
 
 local button
 
@@ -50,8 +51,10 @@ local function ShowTooltip(self)
 	end
 	GameTooltip:AddLine(text, 1, 1, 1)
 	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine("|cffeda55fLeft click:|r open role settings", 0.8, 0.8, 0.8)
-	GameTooltip:AddLine("|cffeda55fRight click:|r switch role (Tank > DPS > Healer)", 0.8, 0.8, 0.8)
+	GameTooltip:AddLine("|cffeda55fLeft click:|r DPS", 0.8, 0.8, 0.8)
+	GameTooltip:AddLine("|cffeda55fMiddle click:|r Tank", 0.8, 0.8, 0.8)
+	GameTooltip:AddLine("|cffeda55fRight click:|r Healer", 0.8, 0.8, 0.8)
+	GameTooltip:AddLine("|cffeda55fAlt+right click:|r options", 0.8, 0.8, 0.8)
 	GameTooltip:AddLine("|cffeda55fDrag:|r move this button", 0.8, 0.8, 0.8)
 	GameTooltip:Show()
 end
@@ -78,7 +81,7 @@ local function CreateButton()
 	button:SetFrameLevel(8)
 	button:SetWidth(31)
 	button:SetHeight(31)
-	button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	button:RegisterForClicks("LeftButtonUp", "MiddleButtonUp", "RightButtonUp")
 	button:RegisterForDrag("LeftButton")
 	button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
 
@@ -102,10 +105,14 @@ local function CreateButton()
 	button.icon = icon
 
 	button:SetScript("OnClick", function(self, mouse)
-		if mouse == "RightButton" then
-			TidyPlatesThreat:SetRole(NEXT_ROLE[TidyPlatesThreat:GetRole()] or "DPS")
+		if mouse == "RightButton" and IsAltKeyDown() then
+			TidyPlatesThreat:OpenOptions()
+		elseif mouse == "RightButton" then
+			TidyPlatesThreat:SetRole("HEALER")
+		elseif mouse == "MiddleButton" then
+			TidyPlatesThreat:SetRole("TANK")
 		else
-			TidyPlatesThreat:OpenOptions("Role")
+			TidyPlatesThreat:SetRole("DPS")
 		end
 	end)
 	button:SetScript("OnDragStart", function(self)
