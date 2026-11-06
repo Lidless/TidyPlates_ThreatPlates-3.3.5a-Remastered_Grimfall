@@ -543,7 +543,7 @@ local function GetOptions()
 									type = "description",
 									fontSize = "medium",
 									order = 1,
-									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n- |cffffd100Quest mobs|r (on by default): a yellow ! with your progress on mobs you still need for a quest.\n- |cffffd100Enemy healers|r (on by default): a big heal icon above enemy players who heal others (battlegrounds / arenas) and above healer mobs.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cff4cccffup arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
+									name = "|cff89F559Nameplate Settings -> Enemy Nameplates|r:\n- |cffffd100Execute line|r (off by default): a vertical mark on enemy health bars at the set health %.\n- |cffffd100Cast highlight|r (off by default): the castbar blinks with a red border when an enemy casts a spell from your list. Spells that you or your group interrupt are learned automatically.\n- |cffffd100Quest mobs|r (on by default): a yellow ! with your progress on mobs you still need for a quest.\n- |cffffd100Enemy healers|r (on by default): a big heal icon above enemy players who heal others (battlegrounds / arenas) and above healer mobs.\n\n|cff89F559Widgets -> Debuffs|r: a blinking |cffff8c00up arrow|r left of the debuff icons when an enemy has a magic or enrage buff that can be purged / dispelled. Exact on your target, focus and mouseover; on other mobs it works for buffs it has already seen.\n\n|cff89F559Nameplate Settings -> Friendly|r: tick what you can remove (magic, curse, poison, disease) and those crowd control icons on group members blink.\n\n|cff89F559Nameplate Settings -> Friendly|r: friendly players with a light blue health bar, or name only (the bar appears while the player is damaged); friendly NPCs can be shown as name only."
 								}
 							}
 						},
@@ -946,7 +946,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it. Only your own quests (the game does not tell your group's quests).\n"
+											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it (learned only while switched on, forgotten when the quest is turned in). Only your own quests (the game does not tell your group's quests).\n"
 										},
 										Toggle = {
 											name = L["Enable"],
@@ -1000,7 +1000,7 @@ local function GetOptions()
 									type = "description",
 									order = 0,
 									fontSize = "medium",
-									name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, and effects on your party / raid members.\n"
+									name = "Everything for |cff40FF40friendly|r nameplates: which ones are shown, how players and NPCs look, service icons above traders, and effects on your party / raid members.\n"
 								},
 								Show = {
 									type = "group",
@@ -1207,6 +1207,93 @@ local function GetOptions()
 											get = GetValue,
 											set = SetValue,
 											arg = {"friendlyNameOnly"}
+										}
+									}
+								},
+								ServiceIcons = {
+									name = "Service icons",
+									type = "group",
+									inline = true,
+									order = 4.5,
+									args = {
+										Info = {
+											type = "description",
+											order = 0,
+											fontSize = "medium",
+											name = "An icon and / or the title (e.g. Shaman Trainer) above friendly and neutral service NPCs: flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents, poisons, ammo and other vendors. The game tells an NPC's job only in its tooltip, so |cffffd100mouse over each one once|r; after that its icon is always shown (remembered for all characters, learned even while switched off).\n"
+										},
+										Toggle = {
+											name = L["Enable"],
+											type = "toggle",
+											order = 1,
+											width = "double",
+											get = function()
+												return db.serviceIcons.ON
+											end,
+											set = function(info, val)
+												db.serviceIcons.ON = val
+											end
+										},
+										Mode = {
+											name = "Show",
+											type = "select",
+											order = 1.5,
+											values = {icon = "Icon", text = "Title text", both = "Icon and title"},
+											desc = "Title text: the NPC's job written out (e.g. Shaman Trainer), handy when many trainers stand side by side. NPCs without an icon rule still show their title.",
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.mode or "both"
+											end,
+											set = function(info, val)
+												db.serviceIcons.mode = val
+											end
+										},
+										Size = {
+											name = "Icon size",
+											type = "range",
+											order = 2,
+											min = 10,
+											max = 40,
+											step = 1,
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.size
+											end,
+											set = function(info, val)
+												db.serviceIcons.size = val
+											end
+										},
+										Height = {
+											name = "Height",
+											type = "range",
+											order = 3,
+											min = -30,
+											max = 60,
+											step = 1,
+											disabled = function()
+												return not db.serviceIcons.ON
+											end,
+											get = function()
+												return db.serviceIcons.y
+											end,
+											set = function(info, val)
+												db.serviceIcons.y = val
+											end
+										},
+										Forget = {
+											name = "Forget learned NPCs",
+											type = "execute",
+											order = 4,
+											desc = "Clears the remembered NPC titles; they are learned again on mouseover.",
+											confirm = true,
+											confirmText = "Forget all learned service NPCs?",
+											func = function()
+												TidyPlatesThreat.ForgetServiceNPCs()
+											end
 										}
 									}
 								},

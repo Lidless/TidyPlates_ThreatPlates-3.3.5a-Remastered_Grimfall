@@ -12,9 +12,14 @@
 --                         focus (the game gives numbers only for these). DPS / Healer: how
 --                         close you are to pulling (100% = you pull); Tank: own threat,
 --                         100% = the mob is on you, lower = someone else has it.
+--   * Service icons     : icon above friendly / neutral service NPCs (flight master, innkeeper,
+--                         repair, bank, auction, trainers, vendors...). The game gives only the
+--                         NPC's title (<Flight Master>) in its tooltip, so an NPC is learned the
+--                         first time you mouse over it and remembered for all characters.
 --   * Quest mobs        : big yellow "!" with the progress (3/10) above mobs you still need for a
 --                         quest: kill objectives from the quest log, item drop mobs learned
---                         from tooltips (any line naming an objective / quest) and from loot.
+--                         from tooltips (any line naming an objective / quest) and from loot
+--                         (only while switched on; forgotten when the quest leaves the log).
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -237,14 +242,111 @@ local function ThreatSound(oldBand, newBand)
 end
 
 -------------------------------------------------------------------------------
+-- Service icons (traders)
+-------------------------------------------------------------------------------
+local TRACK = "Interface\\Minimap\\Tracking\\"
+local VENDOR_ICON = "Interface\\GossipFrame\\VendorGossipIcon"
+local PROFESSIONS = {
+	"alchemy", "blacksmith", "enchant", "engineer", "herbalis", "inscription", "jewelcraft",
+	"leatherwork", "mining", "skinning", "tailor", "cooking", "first aid", "fishing", "riding"
+}
+-- first match wins (lower case parts of the title)
+local SERVICE_RULES = {
+	{TRACK .. "FlightMaster", {"flight master", "wind rider master", "gryphon master", "hippogryph master", "bat handler", "flight"}},
+	{TRACK .. "Innkeeper", {"innkeeper"}},
+	{TRACK .. "StableMaster", {"stable master"}},
+	{TRACK .. "Banker", {"banker", "bank"}},
+	{TRACK .. "Auctioneer", {"auctioneer"}},
+	{TRACK .. "BattleMaster", {"battlemaster"}},
+	{"TRAINER", {"trainer"}},
+	{TRACK .. "Repair", {"armorer", "weaponsmith", "weapon merchant", "repair", "armor merchant", "armorsmith"}},
+	{TRACK .. "Poisons", {"poison"}},
+	{TRACK .. "Reagents", {"reagent"}},
+	{TRACK .. "Ammunition", {"ammo", "bowyer", "gunsmith", "arrow", "bullet"}},
+	{TRACK .. "Food", {"food", "drink", "baker", "bread", "butcher", "meat", "fruit", "mushroom", "wine", "brew", "bartender", "cheese", "fishmonger"}},
+	{"Interface\\GossipFrame\\TabardGossipIcon", {"guild master", "tabard"}},
+	{VENDOR_ICON, {"vendor", "merchant", "supplies", "supplier", "goods", "trade", "shop", "seller", "quartermaster", "tailor", "clothier", "smith", "dealer", "provisioner"}}
+}
+
+local function ServiceIcon(title)
+	local t = title and string.lower(title)
+	if not t then
+		return
+	end
+	for _, rule in ipairs(SERVICE_RULES) do
+		for _, word in ipairs(rule[2]) do
+			if string.find(t, word, 1, true) then
+				if rule[1] == "TRAINER" then
+					for _, prof in ipairs(PROFESSIONS) do
+						if string.find(t, prof, 1, true) then
+							return TRACK .. "Profession"
+						end
+					end
+					return TRACK .. "Class"
+				end
+				return rule[1]
+			end
+		end
+	end
+end
+
+local function KnownTitles()
+	local g = TidyPlatesThreat.db and TidyPlatesThreat.db.global
+	if not g then
+		return {}
+	end
+	g.npcTitles = g.npcTitles or {}
+	return g.npcTitles
+end
+
+-- a non-player unit's tooltip: line 2 is its title ("Trade Supplies" on Grimfall, "<Trade Supplies>"
+-- on other clients); NPCs without a title have the level line there
+local LEVEL_PREFIX = "^" .. (LEVEL or "Level") .. " "
+local function TooltipTitle(line)
+	if not line then
+		return
+	end
+	line = string.gsub(line, "|c%x%x%x%x%x%x%x%x", "")
+	line = string.gsub(line, "|r", "")
+	line = string.match(line, "^%s*(.-)%s*$")
+	if line == "" or string.find(line, LEVEL_PREFIX) or string.find(line, "^Level ") then
+		return
+	end
+	return string.match(line, "^<(.+)>$") or line
+end
+
+-- learns also while the icons are switched off, so turning them on needs no new learning
+local function ScanServiceTooltip()
+	local _, uid = GameTooltip:GetUnit()
+	if not uid or UnitIsPlayer(uid) or UnitPlayerControlled(uid) or UnitCanAttack("player", uid) then
+		return
+	end
+	local name = UnitName(uid)
+	local fs = _G["GameTooltipTextLeft2"]
+	local line = fs and fs:GetText()
+	local title = TooltipTitle(line)
+	if name and title then
+		KnownTitles()[name] = title
+	end
+end
+
+function TidyPlatesThreat.ForgetServiceNPCs()
+	wipe(KnownTitles())
+end
+
+-------------------------------------------------------------------------------
 -- Quest mobs
 -------------------------------------------------------------------------------
 local QUEST_TEXTURE = "Interface\\GossipFrame\\AvailableQuestIcon"
 local MIN_MATCH_LEN = 4 -- objective / quest names shorter than this are not matched in tooltips
 local questObjectives = {} -- list of objectives {quest, name, cur, max, done, kind, key}
 local objectiveByKey = {}  -- "quest|objective" -> objective
-local killTargets = {}     -- lower case mob name -> objective (kill objectives)
+local killTargets = {}     -- lower case mob name -> objective (open kill objectives)
+local killNames = {}       -- lower case mob name -> true (every kill objective, open or done)
 local questDirty, lastQuestBuild = true, 0
+local QUEST_REFRESH = 2 -- seconds; the quest log is also re-read regularly (the game can report a
+                        -- change before the log really changed, e.g. right at turn-in)
+local pruneAfter = 0    -- no forgetting right after login: the quest log can still be empty then
 
 local function Lower(str)
 	return str and string.lower(str)
@@ -263,6 +365,7 @@ local function RebuildQuests()
 	wipe(questObjectives)
 	wipe(objectiveByKey)
 	wipe(killTargets)
+	wipe(killNames)
 	for i = 1, (GetNumQuestLogEntries() or 0) do
 		local title, _, _, _, isHeader = GetQuestLogTitle(i)
 		if title and not isHeader then
@@ -279,8 +382,11 @@ local function RebuildQuests()
 					obj.key = title .. "|" .. name
 					objectiveByKey[obj.key] = obj
 					table.insert(questObjectives, obj)
-					if kind == "monster" and not obj.done then
-						killTargets[Lower(name)] = obj
+					if kind == "monster" then
+						killNames[Lower(name)] = true
+						if not obj.done then
+							killTargets[Lower(name)] = obj
+						end
 					end
 				end
 			end
@@ -288,16 +394,38 @@ local function RebuildQuests()
 	end
 	questDirty = false
 	lastQuestBuild = GetTime()
+	-- forget mobs learned for quests that are no longer in the quest log (turned in / abandoned)
+	if GetTime() < pruneAfter then
+		return
+	end
+	local learned = LearnedQuestMobs()
+	for mob, keys in pairs(learned) do
+		for key in pairs(keys) do
+			-- quest gone, or the mob is a kill objective (its mark comes from the kill objective)
+			if not objectiveByKey[key] or killNames[mob] then
+				keys[key] = nil
+			end
+		end
+		if not next(keys) then
+			learned[mob] = nil
+		end
+	end
 end
 
 local function UpdateQuestsIfNeeded()
-	if questDirty and GetTime() - lastQuestBuild > 0.5 then
+	local age = GetTime() - lastQuestBuild
+	if (questDirty and age > 0.5) or age > QUEST_REFRESH then
 		RebuildQuests()
 	end
 end
 
 local function LearnQuestMob(mob, obj)
 	local l = Lower(mob)
+	-- a mob you have to kill gets its mark from the kill objective; never tie it to other
+	-- objectives of the quest (e.g. an item dropped by another, named mob)
+	if killNames[l] or obj.kind == "monster" then
+		return
+	end
 	local learned = LearnedQuestMobs()
 	learned[l] = learned[l] or {}
 	learned[l][obj.key] = true
@@ -324,7 +452,33 @@ local function QuestFor(mob)
 	end
 end
 
+-- /tptpquest: why does the target (or the mouseover) have a quest mark?
+SLASH_TPTPQUEST1 = "/tptpquest"
+SlashCmdList["TPTPQUEST"] = function()
+	local uid = UnitExists("target") and "target" or "mouseover"
+	local mob = UnitName(uid)
+	local p = "|cff89F559Threat Plates|r: "
+	if not mob then
+		print(p .. "target a mob first")
+		return
+	end
+	RebuildQuests()
+	local l = Lower(mob)
+	local kill = killTargets[l]
+	print(p .. mob .. " - kill objective: " .. (kill and (kill.quest .. " / " .. kill.name .. " " .. kill.cur .. "/" .. kill.max) or "none"))
+	local keys = LearnedQuestMobs()[l]
+	if keys then
+		for key in pairs(keys) do
+			local obj = objectiveByKey[key]
+			print(p .. "  learned for: " .. key .. (obj and (" " .. obj.cur .. "/" .. obj.max .. (obj.done and " (done)" or "")) or " (quest gone)"))
+		end
+	else
+		print(p .. "  not learned for any quest")
+	end
+end
+
 -- tooltip of a mob: any line naming an open objective or quest -> remember the mob
+-- learns only while quest marks are switched on
 local function ScanTooltip()
 	local db = DB()
 	if not (db and db.questMobs and db.questMobs.ON) then
@@ -338,21 +492,35 @@ local function ScanTooltip()
 	if not mob then
 		return
 	end
+	-- only mobs you can attack: quest givers / turn-in NPCs name the quest in their tooltip too
+	if not UnitCanAttack("player", uid) then
+		LearnedQuestMobs()[Lower(mob)] = nil -- clean up a wrong earlier match
+		return
+	end
 	if questDirty then
 		RebuildQuests()
 	end
+	-- the tooltip often names the exact objective of this mob ("- Kreenig Snarlsnout's Tusk: 0/1");
+	-- the quest title alone is used only when no objective is named
+	local byObjective, byTitle = {}, {}
 	for i = 2, GameTooltip:NumLines() do
 		local fs = _G["GameTooltipTextLeft" .. i]
 		local text = fs and Lower(fs:GetText())
 		if text and text ~= "" then
 			for _, obj in ipairs(questObjectives) do
-				if not obj.done then
-					local on, oq = Lower(obj.name), Lower(obj.quest)
-					if (#on >= MIN_MATCH_LEN and string.find(text, on, 1, true)) or (#oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true)) then
-						LearnQuestMob(mob, obj)
-					end
+				local on, oq = Lower(obj.name), Lower(obj.quest)
+				if #on >= MIN_MATCH_LEN and string.find(text, on, 1, true) then
+					byObjective[obj] = true
+				elseif #oq >= MIN_MATCH_LEN and string.find(text, oq, 1, true) then
+					byTitle[obj] = true
 				end
 			end
+		end
+	end
+	local learnFrom = next(byObjective) and byObjective or byTitle
+	for obj in pairs(learnFrom) do
+		if not obj.done then
+			LearnQuestMob(mob, obj)
 		end
 	end
 end
@@ -364,6 +532,7 @@ tooltipScanner:SetScript("OnUpdate", function(self)
 	self:Hide()
 	if GameTooltip:IsShown() then
 		ScanTooltip()
+		ScanServiceTooltip()
 	end
 end)
 GameTooltip:HookScript("OnTooltipSetUnit", function()
@@ -371,15 +540,16 @@ GameTooltip:HookScript("OnTooltipSetUnit", function()
 end)
 
 -- looting a quest item from a corpse -> remember the mob
+-- learns only while quest marks are switched on
 local function ScanLoot()
 	local db = DB()
 	if not (db and db.questMobs and db.questMobs.ON) then
 		return
 	end
 	local mob
-	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") then
+	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") and UnitCanAttack("player", "mouseover") then
 		mob = UnitName("mouseover")
-	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") then
+	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") and UnitCanAttack("player", "target") then
 		mob = UnitName("target")
 	end
 	if not mob then
@@ -472,13 +642,13 @@ local function GetDecor(ext)
 	end
 	-- dispellable arrow
 	local arrow = CreateFrame("Frame", nil, ext)
-	arrow:SetWidth(16)
-	arrow:SetHeight(16)
+	arrow:SetWidth(19) -- 20% bigger than the first version, easier to see
+	arrow:SetHeight(19)
 	arrow:SetFrameLevel(ext:GetFrameLevel() + 5)
 	local at = arrow:CreateTexture(nil, "OVERLAY")
 	at:SetAllPoints(arrow)
 	at:SetTexture(ARROW_TEXTURE)
-	at:SetVertexColor(0.3, 0.8, 1)
+	at:SetVertexColor(1, 0.55, 0) -- orange
 	arrow.tex = at
 	arrow:Hide()
 	d.arrow = arrow
@@ -511,6 +681,19 @@ local function GetDecor(ext)
 	quest:SetPoint("CENTER", ext, "CENTER", -12, 52)
 	quest:Hide()
 	d.quest = quest
+	-- service icon above the name of friendly / neutral NPCs
+	local svc = CreateFrame("Frame", nil, ext)
+	svc:SetFrameLevel(ext:GetFrameLevel() + 6)
+	local st = svc:CreateTexture(nil, "OVERLAY")
+	st:SetAllPoints(svc)
+	svc.tex = st
+	-- the title as text (e.g. "Shaman Trainer"), instead of or next to the icon
+	local sl = svc:CreateFontString(nil, "OVERLAY")
+	sl:SetFont(STANDARD_TEXT_FONT, 10, "OUTLINE")
+	sl:SetTextColor(1, 0.82, 0)
+	svc.label = sl
+	svc:Hide()
+	d.service = svc
 	-- threat %
 	local tp = CreateFrame("Frame", nil, ext)
 	tp:SetWidth(40)
@@ -662,6 +845,53 @@ local function UpdatePlates(elapsed)
 				d.threatPct:Hide()
 			end
 
+			-- service icon / title (friendly / neutral NPCs, also when shown as name only)
+			local si = db.serviceIcons
+			local title, icon
+			if si and si.ON and unit.type == "NPC" and (unit.reaction == "FRIENDLY" or unit.reaction == "NEUTRAL") and ext.stylename ~= "empty" then
+				title = KnownTitles()[unit.name]
+				icon = ServiceIcon(title)
+			end
+			local mode = si and si.mode or "both"
+			local showIcon = icon and (mode == "icon" or mode == "both")
+			local showText = title and (mode == "text" or mode == "both")
+			if showIcon or showText then
+				local svc = d.service
+				local size = si.size or 20
+				svc:SetHeight(size)
+				svc.label:ClearAllPoints()
+				if showIcon then
+					svc.tex:SetTexture(icon)
+					svc.tex:ClearAllPoints()
+					svc.tex:SetPoint("LEFT", svc, "LEFT", 0, 0)
+					svc.tex:SetWidth(size)
+					svc.tex:SetHeight(size)
+					svc.tex:Show()
+				else
+					svc.tex:Hide()
+				end
+				if showText then
+					svc.label:SetText(title)
+					if showIcon then
+						svc.label:SetPoint("LEFT", svc.tex, "RIGHT", 2, 0)
+					else
+						svc.label:SetPoint("LEFT", svc, "LEFT", 0, 0)
+					end
+					svc.label:Show()
+				else
+					svc.label:SetText("")
+					svc.label:Hide()
+				end
+				-- centre the icon + text group above the name
+				local width = (showIcon and size or 0) + (showText and ((showIcon and 2 or 0) + (svc.label:GetStringWidth() or 0)) or 0)
+				svc:SetWidth(math.max(width, 1))
+				svc:ClearAllPoints()
+				svc:SetPoint("BOTTOM", ext, "CENTER", 0, 18 + (si.y or 0))
+				svc:Show()
+			else
+				d.service:Hide()
+			end
+
 			-- quest mark
 			local qm = db.questMobs
 			local obj = enemy and qm and qm.ON and QuestFor(unit.name)
@@ -757,6 +987,7 @@ driver:SetScript("OnEvent", function(self, event, ...)
 		-- new battleground / arena / dungeon: forget the old healers
 		ResetHealers()
 		questDirty = true
+		pruneAfter = GetTime() + 10
 	elseif event == "QUEST_LOG_UPDATE" or event == "UNIT_QUEST_LOG_CHANGED" then
 		questDirty = true
 	elseif event == "LOOT_OPENED" then

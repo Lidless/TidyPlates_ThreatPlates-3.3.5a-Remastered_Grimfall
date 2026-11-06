@@ -104,7 +104,8 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
 - **Quest mobs** (same place, on by default): a big yellow **!** with your progress (e.g. 3/10) above the nameplate of
   mobs you still need for a quest; gone when the objective is complete. Kill objectives come from the quest log; mobs
   that drop quest items are learned when their tooltip names one of your open objectives / quests, or when you loot a
-  quest item from them (remembered across sessions, a *Forget* button clears the list). Only your own quests.
+  quest item from them (only while quest marks are on; forgotten when the quest is turned in or abandoned, a
+  *Forget* button clears the list). Only your own quests.
 - **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a
   magic / enrage buff. Exact on target / focus / mouseover; on other mobs for buffs already seen (learned list).
 - **Nameplate Settings → Friendly**: tick the dispel types you can remove (magic, curse, poison, disease) and those crowd control
@@ -131,6 +132,11 @@ number above the health bar (on a dark background, readable on any ground), in c
 - **Nameplates on by default, remembered per character**: on a character's first login both enemy and friendly
   nameplates are turned on; after that the state the character had at logout (V / Shift+V) is restored at the next
   login (the game itself keeps one setting for all characters).
+- **Service icons** (Nameplate Settings → Friendly, on by default, icon + title): an icon, the title text (e.g. *Shaman Trainer*) or
+  both above friendly / neutral service NPCs
+  (flight master, innkeeper, repair, bank, auction, stable, battlemaster, class / profession trainer, food, reagents,
+  poisons, ammo, other vendors). The game tells an NPC's job only in its tooltip (`<Flight Master>`), so each NPC is
+  learned the first time you mouse over it and remembered for all characters.
 - **Nameplate keys** (remembered per character, changeable in Key Bindings → Threat Plates):
   | Key | Toggles |
   | --- | --- |

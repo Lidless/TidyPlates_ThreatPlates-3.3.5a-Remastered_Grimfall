@@ -167,6 +167,7 @@ function TidyPlatesThreat:OnInitialize()
 			castHighlight = {ON = false, learn = true, spells = {}},
 			enemyHealers = {ON = true, npcs = true, size = 32, y = 62},
 			questMobs = {ON = true, progress = true},
+			serviceIcons = {ON = true, mode = "both", size = 20, y = 0},
 			purgeArrow = {ON = true},
 			minimap = {
 				hide = false,
