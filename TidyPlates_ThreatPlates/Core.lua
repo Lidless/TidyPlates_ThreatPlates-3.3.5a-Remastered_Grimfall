@@ -470,12 +470,13 @@ function TidyPlatesThreat:OnInitialize()
 					["Neutral"] = 0.95,
 					["Marked"] = 1
 				},
+				-- 10% more opaque than the original defaults: the plates blended into the ground
 				alpha = {
 					["Totem"] = 1,
-					["Boss"] = 0.9,
-					["Elite"] = 0.7,
-					["Normal"] = 0.7,
-					["Neutral"] = 0.7,
+					["Boss"] = 1,
+					["Elite"] = 0.8,
+					["Normal"] = 0.8,
+					["Neutral"] = 0.8,
 					["Marked"] = 1
 				}
 			}
