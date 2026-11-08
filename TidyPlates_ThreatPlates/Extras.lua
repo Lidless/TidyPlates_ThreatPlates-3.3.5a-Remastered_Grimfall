@@ -584,6 +584,23 @@ SlashCmdList["TPTPQUEST"] = function()
 	local l = Lower(mob)
 	local kill = killTargets[l]
 	print(p .. mob .. " - kill objective: " .. (kill and (kill.quest .. " / " .. kill.name .. " " .. kill.cur .. "/" .. kill.max) or "none"))
+	-- quest text matches
+	local found
+	for _, o in ipairs(questObjectives) do
+		local words = o.kind == "item" and sourceWords[o.quest]
+		if words and NameInWords(mob, words) then
+			local list = {}
+			for w in pairs(words) do
+				list[#list + 1] = w
+			end
+			table.sort(list)
+			print(p .. "  quest text: " .. o.quest .. " / " .. o.name .. " " .. o.cur .. "/" .. o.max .. (o.done and " (done)" or "") .. "  [from: " .. table.concat(list, " ") .. "]")
+			found = true
+		end
+	end
+	if not found then
+		print(p .. "  quest text: none")
+	end
 	local keys = LearnedQuestMobs()[l]
 	if keys then
 		for key in pairs(keys) do
