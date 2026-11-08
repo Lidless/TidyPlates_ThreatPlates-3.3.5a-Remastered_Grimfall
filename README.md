@@ -103,7 +103,7 @@ Limit of the 3.3.5 client: a mob's target is only known for mobs targeted by you
   Enemy players: only in battlegrounds and arenas; healer NPCs: everywhere (can be turned off). Cleared on zone change.
 - **Quest mobs** (same place, on by default): a big yellow **!** with your progress (e.g. 3/10) above the nameplate of
   mobs you still need for a quest; gone when the objective is complete. Kill objectives come from the quest log; mobs
-  that drop quest items are learned when their tooltip names one of your open objectives / quests, or when you loot a
+  that drop quest items are taken from the quest text ("... from one of the Venture Co. Overseers or Enforcers") or learned when their tooltip names one of your open objectives / quests, or when you loot a
   quest item from them (only while quest marks are on; forgotten when the quest is turned in or abandoned, a
   *Forget* button clears the list). Only your own quests.
 - **Dispellable buff arrow** (Widgets → Debuffs): a blinking up arrow left of the debuff icons when an enemy has a

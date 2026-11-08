@@ -946,7 +946,7 @@ local function GetOptions()
 											type = "description",
 											order = 0,
 											fontSize = "medium",
-											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it (learned only while switched on, forgotten when the quest is turned in). Only your own quests (the game does not tell your group's quests).\n"
+											name = "A big yellow |cffffd100!|r with your progress (e.g. 3/10) above the nameplate of mobs you still need for a quest; it disappears when the objective is complete. Kill objectives come from your quest log. Mobs that drop quest items are taken from the quest text (\"... from one of the Venture Co. Overseers or Enforcers\"), or learned: when a mob's tooltip names one of your open objectives or quests, or when you loot a quest item from it (learned only while switched on, forgotten when the quest is turned in). Only your own quests (the game does not tell your group's quests).\n"
 										},
 										Toggle = {
 											name = L["Enable"],
