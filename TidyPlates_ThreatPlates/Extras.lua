@@ -682,10 +682,10 @@ local function ScanLoot()
 		return
 	end
 	local mob
+	-- only the corpse under the mouse (right-click looting): the target is NOT used, it can be a dead
+	-- mob next to a chest / object you are looting (e.g. Stolen Silver next to a dead raptor)
 	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") and UnitCanAttack("player", "mouseover") then
 		mob = UnitName("mouseover")
-	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") and UnitCanAttack("player", "target") then
-		mob = UnitName("target")
 	end
 	if not mob then
 		return
