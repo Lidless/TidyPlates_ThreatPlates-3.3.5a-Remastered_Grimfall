@@ -698,6 +698,7 @@ local function GetOptions()
 													set = function()
 														SetCVar("nameplateShowEnemies", abs(GetCVar("nameplateShowEnemies") - 1))
 														NAMEPLATES_ON = (GetCVar("nameplateShowEnemies") == "1") or nil
+														TidyPlatesThreat.enemyNameplates = (GetCVar("nameplateShowEnemies") == "1")
 													end
 												},
 												nameplateShowEnemyPets = {
