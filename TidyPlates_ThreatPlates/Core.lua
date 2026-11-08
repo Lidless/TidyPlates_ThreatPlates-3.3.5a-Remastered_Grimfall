@@ -696,6 +696,7 @@ local function EventHandler(self, event, ...)
 		SetCVar("nameplateShowEnemies", CharDB.showEnemies and 1 or 0)
 		-- the key bindings toggle by this global: keep it in step, so the first V press is right
 		NAMEPLATES_ON = CharDB.showEnemies and true or nil
+		TidyPlatesThreat.enemyNameplates = CharDB.showEnemies
 		TidyPlatesThreat.friendlyPlayers = CharDB.showFriends
 		TidyPlatesThreat.friendlyNPCs = CharDB.showFriendlyNPCs
 		TidyPlatesThreat:ApplyFriendlyNameplates()
@@ -778,6 +779,7 @@ end
 
 function TidyPlatesThreat:ToggleEnemyNameplates()
 	local on = GetCVar("nameplateShowEnemies") ~= "1"
+	self.enemyNameplates = on
 	SetCVar("nameplateShowEnemies", on and 1 or 0)
 	NAMEPLATES_ON = on and true or nil
 	-- some clients touch the friendly switch too: keep it as wanted
@@ -796,6 +798,7 @@ end
 function TidyPlatesThreat:ToggleAllNameplates()
 	local allOn = GetCVar("nameplateShowEnemies") == "1" and self.friendlyPlayers and self.friendlyNPCs
 	local on = not allOn
+	self.enemyNameplates = on
 	SetCVar("nameplateShowEnemies", on and 1 or 0)
 	NAMEPLATES_ON = on and true or nil
 	self.friendlyPlayers = on
@@ -834,6 +837,34 @@ function TidyPlatesThreat:AssignNameplateKeys()
 		SaveBindings(GetCurrentBindingSet())
 	end
 	char.nameplateKeys = 2
+end
+
+-- The client can restore its own old nameplate state at the end of loading (after PLAYER_LOGIN):
+-- set the remembered state again 1 and 3 seconds after entering the world.
+do
+	local reapply = CreateFrame("Frame")
+	local elapsed, steps = 0, nil
+	reapply:Hide()
+	reapply:SetScript("OnUpdate", function(self, e)
+		elapsed = elapsed + e
+		if steps and elapsed >= steps[1] then
+			table.remove(steps, 1)
+			local T = TidyPlatesThreat
+			if T.enemyNameplates ~= nil then
+				SetCVar("nameplateShowEnemies", T.enemyNameplates and 1 or 0)
+				NAMEPLATES_ON = T.enemyNameplates and true or nil
+				T:ApplyFriendlyNameplates()
+			end
+			if #steps == 0 then
+				self:Hide()
+			end
+		end
+	end)
+	reapply:RegisterEvent("PLAYER_ENTERING_WORLD")
+	reapply:SetScript("OnEvent", function(self)
+		elapsed, steps = 0, {1, 3}
+		self:Show()
+	end)
 end
 
 -- the game's V hides friendly nameplates too: put them back as wanted

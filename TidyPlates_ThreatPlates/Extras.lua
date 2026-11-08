@@ -20,6 +20,8 @@
 --                         quest: kill objectives from the quest log, item drop mobs learned
 --                         from tooltips (any line naming an objective / quest) and from loot
 --                         (only while switched on; forgotten when the quest leaves the log).
+--                         Item objectives also use the quest text: "... from one of the
+--                         Venture Co. Overseers or Enforcers for ..." marks those mobs at once.
 -----------------------------------------------------------------------------
 local TidyPlatesThreat = TidyPlatesThreat
 local TidyPlates = TidyPlates
@@ -361,14 +363,105 @@ local function LearnedQuestMobs()
 	return g.questMobs
 end
 
+-- "Retrieve the Cats Eye Emerald from one of the Venture Co. Overseers or Enforcers for Wharfmaster
+-- Dizzywig at Ratchet.": the part after " from ", cut before " for / to / at / in ..." (so the
+-- quest giver is never matched), split into words.
+local sourceWords = {}   -- quest title -> {word = true} (nil: no "from" part)
+local sourceChecked = {} -- quest title -> true when its text was read
+local textMatch = {}     -- lower case mob name -> objective or false (cache, cleared on rebuild)
+local ABBREVIATIONS = {"co", "mr", "mrs", "dr", "st", "mt", "jr", "sr", "lt", "sgt", "capt", "cpt"}
+local SOURCE_STOPS = {" for ", " to ", " at ", " in ", " near ", " on ", " and bring", " and return", " and take", " so ", " before ", " while ", "%.", ",", ";", "!"}
+
+local function WordsOf(text)
+	local words = {}
+	for w in string.gmatch(string.lower(text), "[%w']+") do
+		words[w] = true
+	end
+	return words
+end
+
+local function SourcePart(text)
+	if not text then
+		return
+	end
+	local t = " " .. string.lower(text) .. " "
+	-- abbreviations are not sentence ends ("Venture Co. Overseers")
+	for _, abbr in ipairs(ABBREVIATIONS) do
+		t = string.gsub(t, "([%s%(])" .. abbr .. "%.", "%1" .. abbr)
+	end
+	local from = string.find(t, " from ", 1, true)
+	if not from then
+		return
+	end
+	local part = string.sub(t, from + 6)
+	local cut = #part + 1
+	for _, stop in ipairs(SOURCE_STOPS) do
+		local at = string.find(part, stop, 1, stop ~= "%.")
+		if at and at < cut then
+			cut = at
+		end
+	end
+	part = string.sub(part, 1, cut - 1)
+	if part == "" then
+		return
+	end
+	return WordsOf(part)
+end
+
+-- does every word of the mob's name appear in the source part (plural forms allowed)?
+local function NameInWords(mob, words)
+	local any
+	for w in string.gmatch(string.lower(mob), "[%w']+") do
+		any = true
+		if not (words[w] or words[w .. "s"] or words[w .. "es"]
+			or (string.sub(w, -1) == "y" and words[string.sub(w, 1, -2) .. "ies"])
+			or (string.sub(w, -3) == "man" and words[string.sub(w, 1, -4) .. "men"])
+			or (string.sub(w, -1) == "f" and words[string.sub(w, 1, -2) .. "ves"])) then
+			return false
+		end
+	end
+	return any
+end
+
+-- the objective text of a quest is read once (selecting the entry, then restoring the selection)
+local function ReadQuestSource(index, title)
+	if sourceChecked[title] then
+		return
+	end
+	sourceChecked[title] = true
+	if not (SelectQuestLogEntry and GetQuestLogQuestText) then
+		return
+	end
+	local previous = GetQuestLogSelection and GetQuestLogSelection()
+	SelectQuestLogEntry(index)
+	local _, objectiveText = GetQuestLogQuestText()
+	if previous then
+		SelectQuestLogEntry(previous)
+	end
+	sourceWords[title] = SourcePart(objectiveText)
+end
+
 local function RebuildQuests()
 	wipe(questObjectives)
 	wipe(objectiveByKey)
 	wipe(killTargets)
 	wipe(killNames)
+	wipe(textMatch)
+	local present = {}
 	for i = 1, (GetNumQuestLogEntries() or 0) do
 		local title, _, _, _, isHeader = GetQuestLogTitle(i)
 		if title and not isHeader then
+			present[title] = true
+			local hasItem
+			for j = 1, (GetNumQuestLeaderBoards(i) or 0) do
+				local _, kind = GetQuestLogLeaderBoard(j, i)
+				if kind == "item" then
+					hasItem = true
+				end
+			end
+			if hasItem then
+				ReadQuestSource(i, title)
+			end
 			for j = 1, (GetNumQuestLeaderBoards(i) or 0) do
 				local text, kind, finished = GetQuestLogLeaderBoard(j, i)
 				local name, cur, max = string.match(text or "", "^(.-):%s*(%d+)%s*/%s*(%d+)")
@@ -390,6 +483,13 @@ local function RebuildQuests()
 					end
 				end
 			end
+		end
+	end
+	-- forget the source texts of quests that left the log
+	for title in pairs(sourceChecked) do
+		if not present[title] then
+			sourceChecked[title] = nil
+			sourceWords[title] = nil
 		end
 	end
 	questDirty = false
@@ -441,6 +541,24 @@ local function QuestFor(mob)
 	if obj then
 		return obj
 	end
+	-- the quest text names the mobs that have the item ("... from one of the Venture Co. Overseers")
+	if not killNames[l] then
+		local cached = textMatch[l]
+		if cached == nil then
+			cached = false
+			for _, o in ipairs(questObjectives) do
+				local words = o.kind == "item" and not o.done and sourceWords[o.quest]
+				if words and NameInWords(mob, words) then
+					cached = o
+					break
+				end
+			end
+			textMatch[l] = cached
+		end
+		if cached and not cached.done then
+			return cached
+		end
+	end
 	local keys = LearnedQuestMobs()[l]
 	if keys then
 		for key in pairs(keys) do
@@ -466,6 +584,23 @@ SlashCmdList["TPTPQUEST"] = function()
 	local l = Lower(mob)
 	local kill = killTargets[l]
 	print(p .. mob .. " - kill objective: " .. (kill and (kill.quest .. " / " .. kill.name .. " " .. kill.cur .. "/" .. kill.max) or "none"))
+	-- quest text matches
+	local found
+	for _, o in ipairs(questObjectives) do
+		local words = o.kind == "item" and sourceWords[o.quest]
+		if words and NameInWords(mob, words) then
+			local list = {}
+			for w in pairs(words) do
+				list[#list + 1] = w
+			end
+			table.sort(list)
+			print(p .. "  quest text: " .. o.quest .. " / " .. o.name .. " " .. o.cur .. "/" .. o.max .. (o.done and " (done)" or "") .. "  [from: " .. table.concat(list, " ") .. "]")
+			found = true
+		end
+	end
+	if not found then
+		print(p .. "  quest text: none")
+	end
 	local keys = LearnedQuestMobs()[l]
 	if keys then
 		for key in pairs(keys) do
@@ -547,10 +682,10 @@ local function ScanLoot()
 		return
 	end
 	local mob
+	-- only the corpse under the mouse (right-click looting): the target is NOT used, it can be a dead
+	-- mob next to a chest / object you are looting (e.g. Stolen Silver next to a dead raptor)
 	if UnitExists("mouseover") and UnitIsDead("mouseover") and not UnitIsPlayer("mouseover") and UnitCanAttack("player", "mouseover") then
 		mob = UnitName("mouseover")
-	elseif UnitExists("target") and UnitIsDead("target") and not UnitIsPlayer("target") and UnitCanAttack("player", "target") then
-		mob = UnitName("target")
 	end
 	if not mob then
 		return
