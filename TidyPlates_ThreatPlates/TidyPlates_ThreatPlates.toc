@@ -8,7 +8,7 @@
 ## SavedVariables: ThreatPlatesDB
 ## Version: 5.7-role1
 ## OptionalDeps: LibSharedMedia-3.0
-## X-Website: https://github.com/Lidless/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall
+## X-Website: https://github.com/Lidless-Grimfall/TidyPlates_ThreatPlates-3.3.5a-Remastered_Grimfall
 ## X-Date: 2022-08-07 @ 03:19 PM |cff808080UTC|r
 
 Libs\embeds.xml
